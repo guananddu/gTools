@@ -56,10 +56,14 @@
 	/*Debuger Or Regular*/
 	N.debugerFlag        = true;
 	
+	/*Server*/
+	N.isPhpServer        = false;
+	
 	/*常用信息提示*/
 	N.MESSAGES           = N.MESSAGES || {
 		importExternal      : 'Now Start To Import External Framework Tools: ',
-		wrongNameSpaceFormat: 'Wrong NameSpace Foramt, Expected: A-Z a-z 0-9 _ $, And don\'t not start with number: '
+		wrongNameSpaceFormat: 'Wrong NameSpace Foramt, Expected: A-Z a-z 0-9 _ $, And don\'t not start with number: ',
+		loaderLoadedFailed  : 'Loader Loaded Failed!'
 	};
 	
 	/*常用正则表达式*/
@@ -183,10 +187,15 @@
 	/*外部库的配置路径，配置默认值，也可以由用户自己设置*/
 	N.EXTERNALTOOLS.config = N.EXTERNALTOOLS.config || {};
 	N.EXTERNALTOOLS.config = {
-			lazyLoader : N.EXTERNALTOOLS.config.lazyload || 'tools/lazyload-2.0.3/lazyload-min.js',
-			LABjsLoader: N.EXTERNALTOOLS.config.LABjsLoader || (
+			lazyLoader               : N.EXTERNALTOOLS.config.lazyload || 'tools/lazyload-2.0.3/lazyload-min.js',
+			LABjsLoader              : N.EXTERNALTOOLS.config.LABjsLoader || (
 					N.debugerFlag == true ? 'tools/LABjs-2.0.3/LAB-debug.min.js' : 'tools/LABjs-2.0.3/LAB.min.js'
-			)
+			),
+			baidu                    : N.EXTERNALTOOLS.config.baidu || 'tools/tangram-1.3.9/tangram-1.3.9.js',
+			baiduBaseJsImporter      : N.EXTERNALTOOLS.config.baiduBaseJsImporter || 'tools/tangram-1.3.9/fragment/Tangram-base/src/import_.js',
+			baiduBasePhpImporter     : N.EXTERNALTOOLS.config.baiduBasePhpImporter || 'tools/tangram-1.3.9/fragment/Tangram-base/src/import.php',/*php服务器下可以直接请求此文件*/
+			baiduComponentJsImporter : N.EXTERNALTOOLS.config.baiduComponentJsImporter || 'tools/tangram-1.3.9/fragment/Tangram-component/src/import_.js',
+			baiduComponentPhpImporter: N.EXTERNALTOOLS.config.baiduComponentPhpImporter || 'tools/tangram-1.3.9/fragment/Tangram-component/src/import.php'
 	};
 	
 	/**
@@ -208,7 +217,7 @@
 		for(var i = 0, len  = scriptSrcArr.length; i < len; i ++){
 			var tempScript  = document.createElement('script');
 			tempScript.type = 'text/javascript';
-			tempScript.src  = noCache ? (scriptSrcArr[i] + '?t=' + (new Date()).getTime()) : scriptSrcArr[i];
+			tempScript.src  = noCache ? (scriptSrcArr[i] + '?_t_=' + (new Date()).getTime().toString(36)) : scriptSrcArr[i];
 			document.getElementsByTagName('head')[0].appendChild(tempScript);
 			tempScript      = null;
 		}
@@ -224,11 +233,17 @@
 	 * 加载并运行JS文件(XHR)
 	 * @param {string} || {array} scriptSrcArr 需要加载的js文件路径字符串（单个文件）或者数组（多个文件）
 	 * @param {boolean} async xhr请求是否异步（true:异步，false:同步）
+	 * @param {boolean} hideEval 是否将xhr获得的js脚本放入head标签中，true:隐藏脚本加载，不将脚本放入head标签；false:将js脚本放入head中（默认）
+	 * @param {boolena} noCache 是否允许缓存文件（true: 不允许缓存；false: 可以缓存）
+	 * @explain 隐藏式加载，在获取到js字符串的时候，会使用eval来执行，故省去了DOM的添加，但是隐藏式加载需要注意作用域的问题!!!
+	 * 
 	 */
-	N.loader.simpleXhrLoader = function(scriptSrcArr, async){
+	N.loader.simpleXhrLoader = function(scriptSrcArr, async, hideEval, noCache){
 		if(toString.call(scriptSrcArr) == '[object String]')
 			scriptSrcArr     = [scriptSrcArr];
 		async                = async == undefined ? true : async;
+		hideEval             = hideEval == undefined ? false : hideEval;
+		noCache              = noCache == undefined ? true : noCache;
 		var getXHR           = function(){
 			if (window.ActiveXObject){
 				try {
@@ -246,6 +261,10 @@
 		var appendScript    = function(responseScriptStr){
 			if(responseScriptStr == '' || responseScriptStr == null || responseScriptStr == undefined)
 				return;
+			if(hideEval){//隐藏式加载，调用此方法有局限性，浏览器表现差异
+				eval.call(window, responseScriptStr);
+				return;
+			}
 			var tempScript  = document.createElement('script');
 			tempScript.type = 'text/javascript';
 			tempScript.text = responseScriptStr;
@@ -255,7 +274,8 @@
 		xhrs                = [];
 		for(var i = 0, len  = scriptSrcArr.length; i < len; i ++){
 			xhrs[i]         = getXHR();
-			xhrs[i].open('GET', scriptSrcArr[i], async);
+			var tempt       = scriptSrcArr[i].indexOf('?') > -1 ? '&_t_=' : '?_t_=';
+			xhrs[i].open('GET', noCache ? (scriptSrcArr[i] + tempt + (new Date()).getTime().toString(36)) : scriptSrcArr[i], async);
 			if(async){//异步
 /* 				xhrs[i].onreadystatechange = function(){
 					if(xhrs[i].readyState == 4){
@@ -282,18 +302,53 @@
 		}
 	};
 	
-	/*开始整合，阻塞式整合*/
-	N.loader.simpleXhrLoader([N.EXTERNALTOOLS.config.lazyLoader, N.EXTERNALTOOLS.config.LABjsLoader], false);
-	N.debuger.varDump(LazyLoad, $LAB);
-	
+	/*开始整合lazyLoader和LABjsLoader，阻塞式整合，隐含式加载*/
+	N.debuger.throwit('INFO', N.MESSAGES.importExternal + 'LazyLoad to N.loader.lazyLoader, and $LAB to N.loader.LABjsLoader. -- Line 302');
+	N.loader.simpleXhrLoader([N.EXTERNALTOOLS.config.lazyLoader, N.EXTERNALTOOLS.config.LABjsLoader], false, true);
 	try{
-		/*引用Tangram工具库中的ajax工具类*/
-		N.debuger.throwit('INFO', N.MESSAGES.importExternal + 'Tangram, baidu.ajax To N.EXTERNALTOOLS.ajax. -- Line 164');
-		N.EXTERNALTOOLS.ajax = baidu.ajax;
+		N.loader.lazyLoader  = LazyLoad; LazyLoad = null;
+		N.loader.LABjsLoader = $LAB;     $LAB     = null;
 	}catch(e){
-		N.debuger.throwit('WARN', e);
+		N.debuger.throwit('ERROR', N.MESSAGES.loaderLoadedFailed + ' -- Line 304, 305');
 	}
 	
+	/*开始整合Baidu Tangram框架类库，阻塞式整合，附加式加载，全加载*/
+	// N.debuger.throwit('INFO', N.MESSAGES.importExternal + 'Tangram, baidu To N.EXTERNALTOOLS.baidu. -- Line 307');
+	// N.loader.simpleXhrLoader(N.EXTERNALTOOLS.config.baidu, false, false);
+	// try{
+		// N.EXTERNALTOOLS.baidu = baidu;
+		// /*引用Tangram工具库中的ajax工具类*/
+		// N.EXTERNALTOOLS.ajax  = baidu.ajax;
+	// }catch(e){
+		// N.debuger.throwit('WARN', e);
+	// }
+	/**
+	 * Tangram Base 加载函数
+	 * @param {String} namespace 模块格式 aa.bb.cc
+	 * @param {boolean} noCahce 是否允许缓存文件（true: 不允许缓存；false: 可以缓存）
+	 */
+	N.loader.loadBaseTangram     = function(namespace, noCache){
+		if(N.isPhpServer){//PHP服务器
+			return N.loader.simpleXhrLoader(N.EXTERNALTOOLS.config.baiduBasePhpImporter + '?f=' + namespace, false, false, noCache);
+		}else{
+			N.loader.lazyLoader.js(N.EXTERNALTOOLS.config.baiduBaseJsImporter, function(){
+				window.Import(namespace);
+			});
+		}
+	}
+	/**
+	 * Tangram Component 加载函数
+	 * @param {boolean} noCahce 是否允许缓存文件（true: 不允许缓存；false: 可以缓存）
+	 */
+	N.loader.loadComponentTangram = function(namespace, noCache){
+		if(N.isPhpServer){//PHP服务器
+			return N.loader.simpleXhrLoader(N.EXTERNALTOOLS.config.baiduComponentPhpImporter + '?f=' + namespace, false, false, noCache);
+		}else{
+			N.loader.lazyLoader.js(N.EXTERNALTOOLS.config.baiduComponentJsImporter, function(){
+				window.Import(namespace);
+			});
+		}
+	}
 	
 	/*DOM基础方法*/
 	N.dom            = N.dom || {};
