@@ -1,14 +1,14 @@
 /*
- * gw JavaScript Library v1.0.1
+ * gw JavaScript Library v1.0.2
  * Copyright 2011, guanwei. All rights reserved.
  * 
  * author: guanwei
- * version: 1.0.1
- * date: 2011/10/04
+ * version: 1.0.2
+ * date: 2011/10/15
  */
 (function(window, $nameSpace){
 	/*版本号*/
-	var version   = '1.0.1';
+	var version   = '1.0.2';
 	/*声明常用局部变量*/
 	var top       = top,
 		window    = window,
@@ -38,13 +38,15 @@
 		if(ns === NS)
 			return;
 		if(undefined !== ns && null !== ns && '' !== ns && NS !== ns){
-			if(toString.call(ns) === '[object String]'){
+			if(toString.call(ns) === '[object String]' && /^[^A-Za-z$_]|[^\w$]/.test(ns) === false){
 				/*切换*/
 				execCode = 'window.' + NS + ' = undefined;';
 				eval(execCode);
 				execCode = 'window.' + ns + ' = N;';
 				eval(execCode);
 				NS       = ns;
+			}else{
+				N.debuger.throwit('ERROR', N.MESSAGES.wrongNameSpaceFormat + ns);
 			}
 		}else{
 			return;
@@ -56,10 +58,8 @@
 	
 	/*常用信息提示*/
 	N.MESSAGES           = N.MESSAGES || {
-		importExternal:     'Now Start To Import External Framework Tools: '
-/*		hasChangeNameSpace: 'Your Namespace Has Been Changed To: ',
-		sameNameSpace:      'Same Namespace!',
-		emptyNameSpace:     'Empty Namespace!'*/
+		importExternal      : 'Now Start To Import External Framework Tools: ',
+		wrongNameSpaceFormat: 'Wrong NameSpace Foramt, Expected: A-Z a-z 0-9 _ $, And don\'t not start with number: '
 	};
 	
 	/*常用正则表达式*/
@@ -177,8 +177,115 @@
 	};
 	
 	
-	/*引用外部框架*/
-	N.EXTERNALTOOLS      = N.EXTERNALTOOLS || {};
+	/*外部工具*/
+	N.EXTERNALTOOLS        = N.EXTERNALTOOLS || {};
+	
+	/*外部库的配置路径，配置默认值，也可以由用户自己设置*/
+	N.EXTERNALTOOLS.config = N.EXTERNALTOOLS.config || {};
+	N.EXTERNALTOOLS.config = {
+			lazyLoader : N.EXTERNALTOOLS.config.lazyload || 'tools/lazyload-2.0.3/lazyload-min.js',
+			LABjsLoader: N.EXTERNALTOOLS.config.LABjsLoader || (
+					N.debugerFlag == true ? 'tools/LABjs-2.0.3/LAB-debug.min.js' : 'tools/LABjs-2.0.3/LAB.min.js'
+			)
+	};
+	
+	/**
+	 * 整个gw基于lazyLoader和LABjsLoader来加载各种其他的类库和自身的扩展组件
+	 * loader 作为模块加载内置工具
+	 */
+	N.loader                = N.loader || {};
+	/**
+	 * 加载并运行JS文件
+	 * @param {string} || {array} scriptSrcArr 需要加载的js文件路径字符串（单个文件）或者数组（多个文件）
+	 * @param {boolean} noCache 是否允许缓存文件（true: 不允许缓存；false: 可以缓存）
+	 *
+	 * @grammar var scriptSrcArr = ['example1.js' , 'example2.js']; 
+	 *          xxx.loader.simpleLoader(scriptSrcArr, true);
+	 */
+	N.loader.simpleLoader   = function(scriptSrcArr, noCache){
+		if(toString.call(scriptSrcArr) == '[object String]')
+			scriptSrcArr    = [scriptSrcArr];
+		for(var i = 0, len  = scriptSrcArr.length; i < len; i ++){
+			var tempScript  = document.createElement('script');
+			tempScript.type = 'text/javascript';
+			tempScript.src  = noCache ? (scriptSrcArr[i] + '?t=' + (new Date()).getTime()) : scriptSrcArr[i];
+			document.getElementsByTagName('head')[0].appendChild(tempScript);
+			tempScript      = null;
+		}
+		/*Do not run!!
+		var tpl   = '<script type="text/javascript" src="{0}"></script>';
+		for(var i = 0, len = scriptSrcArr.length; i < len; i ++){
+			var src = noCache ? (scriptSrcArr[i] + '?t=' + (new Date()).getTime()) : scriptSrcArr[i];
+			document.getElementsByTagName('head')[0].appendChild(N.dom.getDom(N.str.strFormat(tpl, src)));
+		}
+		*/
+	};
+	/**
+	 * 加载并运行JS文件(XHR)
+	 * @param {string} || {array} scriptSrcArr 需要加载的js文件路径字符串（单个文件）或者数组（多个文件）
+	 * @param {boolean} async xhr请求是否异步（true:异步，false:同步）
+	 */
+	N.loader.simpleXhrLoader = function(scriptSrcArr, async){
+		if(toString.call(scriptSrcArr) == '[object String]')
+			scriptSrcArr     = [scriptSrcArr];
+		async                = async == undefined ? true : async;
+		var getXHR           = function(){
+			if (window.ActiveXObject){
+				try {
+					return new ActiveXObject("Msxml2.XMLHTTP");
+				} catch(e){
+					try {
+						return new ActiveXObject("Microsoft.XMLHTTP");
+					} catch(e){}
+				}
+			}
+			if (window.XMLHttpRequest) {
+				return new XMLHttpRequest();
+			}
+		};
+		var appendScript    = function(responseScriptStr){
+			if(responseScriptStr == '' || responseScriptStr == null || responseScriptStr == undefined)
+				return;
+			var tempScript  = document.createElement('script');
+			tempScript.type = 'text/javascript';
+			tempScript.text = responseScriptStr;
+			document.getElementsByTagName('head')[0].appendChild(tempScript);
+			tempScript      = null;
+		};
+		xhrs                = [];
+		for(var i = 0, len  = scriptSrcArr.length; i < len; i ++){
+			xhrs[i]         = getXHR();
+			xhrs[i].open('GET', scriptSrcArr[i], async);
+			if(async){//异步
+/* 				xhrs[i].onreadystatechange = function(){
+					if(xhrs[i].readyState == 4){
+						if(xhrs[i].status >= 200 && xhrs[i].status < 300 || xhrs[i].status == 304){
+							appendScript(xhrs[i].responseText);
+						}
+					}
+				}; 注意以上逻辑错误*/
+				/*需要启用闭包形式，如下*/
+				xhrs[i].onreadystatechange = function(index){
+					return function(){
+						if(xhrs[index].readyState == 4){
+							if(xhrs[index].status >= 200 && xhrs[index].status < 300 || xhrs[index].status == 304){
+								appendScript(xhrs[index].responseText);
+							}
+						}
+					}
+				}(i);
+				xhrs[i].send(null);
+			}else{//同步
+				xhrs[i].send(null);
+				appendScript(xhrs[i].responseText);
+			}
+		}
+	};
+	
+	/*开始整合，阻塞式整合*/
+	N.loader.simpleXhrLoader([N.EXTERNALTOOLS.config.lazyLoader, N.EXTERNALTOOLS.config.LABjsLoader], false);
+	N.debuger.varDump(LazyLoad, $LAB);
+	
 	try{
 		/*引用Tangram工具库中的ajax工具类*/
 		N.debuger.throwit('INFO', N.MESSAGES.importExternal + 'Tangram, baidu.ajax To N.EXTERNALTOOLS.ajax. -- Line 164');
@@ -637,32 +744,6 @@
 	
 	/*工具库*/
 	N.tool                  = N.tool || {};
-	/**
-	 * 加载并运行JS文件
-	 * @param {string} || {array} scriptSrcArr 需要加载的js文件路径字符串（单个文件）或者数组（多个文件）
-	 * @param {boolean} noCache 是否允许缓存文件（true: 不允许缓存；false: 可以缓存）
-	 *
-	 * @grammar var scriptSrcArr = ['example1.js' , 'example2.js']; 
-	 *          xxx.tool.loadScript(scriptSrcArr, true);
-	 */
-	N.tool.loadScript       = function(scriptSrcArr, noCache){
-		if(toString.call(scriptSrcArr) == '[object String]')
-			scriptSrcArr    = [scriptSrcArr];
-		for(var i = 0, len  = scriptSrcArr.length; i < len; i ++){
-			var tempScript  = document.createElement('script');
-			tempScript.type = 'text/javascript';
-			tempScript.src  = noCache ? (scriptSrcArr[i] + '?t=' + (new Date()).getTime()) : scriptSrcArr[i];
-			document.getElementsByTagName('head')[0].appendChild(tempScript);
-			tempScript      = null;
-		}
-		/*Do not run!!
-		var tpl   = '<script type="text/javascript" src="{0}"></script>';
-		for(var i = 0, len = scriptSrcArr.length; i < len; i ++){
-			var src = noCache ? (scriptSrcArr[i] + '?t=' + (new Date()).getTime()) : scriptSrcArr[i];
-			document.getElementsByTagName('head')[0].appendChild(N.dom.getDom(N.str.strFormat(tpl, src)));
-		}
-		*/
-	};
 	/**
 	 * 为特定元素添加Hint（框内暗示）
 	 * @param {string} || {HTMLElement} o 目标元素ID或者本身（作为DOM元素）
