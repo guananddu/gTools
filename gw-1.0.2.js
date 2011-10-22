@@ -19,7 +19,7 @@
 	/*声明核心方法*/
 	var  toString = Object.prototype.toString,
 		   hasOwn = Object.prototype.hasOwnProperty,
-			 trim = String.prototype.trim,
+			 trim = String.prototype.trim,/*不支持IE系列*/
 			 push = Array.prototype.push,
 			slice = Array.prototype.slice,
 		  indexOf = Array.prototype.indexOf;
@@ -63,7 +63,9 @@
 	N.MESSAGES           = N.MESSAGES || {
 		importExternal      : 'Now Start To Import External Framework Tools: ',
 		wrongNameSpaceFormat: 'Wrong NameSpace Foramt, Expected: A-Z a-z 0-9 _ $, And don\'t not start with number: ',
-		loaderLoadedFailed  : 'Loader Loaded Failed!'
+		loaderLoadedFailed  : 'Loader Loaded Failed!',
+		hadLoadedIt         : 'You had loaded this: ',
+		noResponse          : 'No Response About This Request Url: '
 	};
 	
 	/*常用正则表达式*/
@@ -198,6 +200,9 @@
 			baiduComponentPhpImporter: N.EXTERNALTOOLS.config.baiduComponentPhpImporter || 'tools/tangram-1.3.9/fragment/Tangram-component/src/import.php'
 	};
 	
+	/*作为缓冲来防止重复加载*/
+	N.EXTERNALTOOLS.buffer  = {};
+	
 	/**
 	 * 整个gw基于lazyLoader和LABjsLoader来加载各种其他的类库和自身的扩展组件
 	 * loader 作为模块加载内置工具
@@ -217,7 +222,7 @@
 		for(var i = 0, len  = scriptSrcArr.length; i < len; i ++){
 			var tempScript  = document.createElement('script');
 			tempScript.type = 'text/javascript';
-			tempScript.src  = noCache ? (scriptSrcArr[i] + '?_t_=' + (new Date()).getTime().toString(36)) : scriptSrcArr[i];
+			tempScript.src  = noCache ? (scriptSrcArr[i] + '?_gwt_=' + (new Date()).getTime().toString(36)) : scriptSrcArr[i];
 			document.getElementsByTagName('head')[0].appendChild(tempScript);
 			tempScript      = null;
 		}
@@ -233,7 +238,7 @@
 	 * 加载并运行JS文件(XHR)
 	 * @param {string} || {array} scriptSrcArr 需要加载的js文件路径字符串（单个文件）或者数组（多个文件）
 	 * @param {boolean} async xhr请求是否异步（true:异步，false:同步）
-	 * @param {boolean} hideEval 是否将xhr获得的js脚本放入head标签中，true:隐藏脚本加载，不将脚本放入head标签；false:将js脚本放入head中（默认）
+	 * @param {boolean} hideEval 是否 不将xhr获得的js脚本放入head标签中，true:隐藏脚本加载，不将脚本放入head标签；false:将js脚本放入head中（默认）
 	 * @param {boolena} noCache 是否允许缓存文件（true: 不允许缓存；false: 可以缓存）
 	 * @explain 隐藏式加载，在获取到js字符串的时候，会使用eval来执行，故省去了DOM的添加，但是隐藏式加载需要注意作用域的问题!!!
 	 * 
@@ -274,7 +279,7 @@
 		xhrs                = [];
 		for(var i = 0, len  = scriptSrcArr.length; i < len; i ++){
 			xhrs[i]         = getXHR();
-			var tempt       = scriptSrcArr[i].indexOf('?') > -1 ? '&_t_=' : '?_t_=';
+			var tempt       = scriptSrcArr[i].indexOf('?') > -1 ? '&_gwt_=' : '?_gwt_=';
 			xhrs[i].open('GET', noCache ? (scriptSrcArr[i] + tempt + (new Date()).getTime().toString(36)) : scriptSrcArr[i], async);
 			if(async){//异步
 /* 				xhrs[i].onreadystatechange = function(){
@@ -303,13 +308,13 @@
 	};
 	
 	/*开始整合lazyLoader和LABjsLoader，阻塞式整合，隐含式加载*/
-	N.debuger.throwit('INFO', N.MESSAGES.importExternal + 'LazyLoad to N.loader.lazyLoader, and $LAB to N.loader.LABjsLoader. -- Line 302');
+	N.debuger.throwit('INFO', N.MESSAGES.importExternal + 'LazyLoad to N.loader.lazyLoader, and $LAB to N.loader.LABjsLoader.');
 	N.loader.simpleXhrLoader([N.EXTERNALTOOLS.config.lazyLoader, N.EXTERNALTOOLS.config.LABjsLoader], false, true);
 	try{
 		N.loader.lazyLoader  = LazyLoad; LazyLoad = null;
 		N.loader.LABjsLoader = $LAB;     $LAB     = null;
 	}catch(e){
-		N.debuger.throwit('ERROR', N.MESSAGES.loaderLoadedFailed + ' -- Line 304, 305');
+		N.debuger.throwit('ERROR', N.MESSAGES.loaderLoadedFailed);
 	}
 	
 	/*开始整合Baidu Tangram框架类库，阻塞式整合，附加式加载，全加载*/
@@ -328,27 +333,45 @@
 	 * @param {boolean} noCahce 是否允许缓存文件（true: 不允许缓存；false: 可以缓存）
 	 */
 	N.loader.loadBaseTangram     = function(namespace, noCache){
+		if(N.EXTERNALTOOLS.buffer[namespace]){
+			N.debuger.throwit('INFO', N.MESSAGES.hadLoadedIt + namespace);
+			return;
+		}
 		if(N.isPhpServer){//PHP服务器
+			N.EXTERNALTOOLS.buffer[namespace] = 1;
 			return N.loader.simpleXhrLoader(N.EXTERNALTOOLS.config.baiduBasePhpImporter + '?f=' + namespace, false, false, noCache);
 		}else{
-			N.loader.lazyLoader.js(N.EXTERNALTOOLS.config.baiduBaseJsImporter, function(){
+/*			N.loader.lazyLoader.js(N.EXTERNALTOOLS.config.baiduBaseJsImporter, function(){
 				window.Import(namespace);
-			});
+			});不能使用异步加载*/
+			N.loader.simpleXhrLoader(N.EXTERNALTOOLS.config.baiduBaseJsImporter, false, false, noCache);
+			window.Import(namespace);
+			N.EXTERNALTOOLS.buffer[namespace] = 1;
 		}
-	}
+	};
+	
 	/**
-	 * Tangram Component 加载函数
+	 * Tangram Component 加载函数（味如鸡肋）
 	 * @param {boolean} noCahce 是否允许缓存文件（true: 不允许缓存；false: 可以缓存）
+	 * @desc 此函数使用性不强，以其发100个请求来获取一个组件，不如压缩代码
 	 */
 	N.loader.loadComponentTangram = function(namespace, noCache){
+		if(N.EXTERNALTOOLS.buffer[namespace]){
+			N.debuger.throwit('INFO', N.MESSAGES.hadLoadedIt + namespace);
+			return;
+		}
 		if(N.isPhpServer){//PHP服务器
+			N.EXTERNALTOOLS.buffer[namespace] = 1;
 			return N.loader.simpleXhrLoader(N.EXTERNALTOOLS.config.baiduComponentPhpImporter + '?f=' + namespace, false, false, noCache);
 		}else{
-			N.loader.lazyLoader.js(N.EXTERNALTOOLS.config.baiduComponentJsImporter, function(){
+/*			N.loader.lazyLoader.js(N.EXTERNALTOOLS.config.baiduComponentJsImporter, function(){
 				window.Import(namespace);
-			});
+			});不能使用异步加载*/
+			N.loader.simpleXhrLoader(N.EXTERNALTOOLS.config.baiduComponentJsImporter, false, false, noCache);
+			window.Import(namespace);
+			N.EXTERNALTOOLS.buffer[namespace] = 1;
 		}
-	}
+	};
 	
 	/*DOM基础方法*/
 	N.dom            = N.dom || {};
@@ -589,6 +612,50 @@
 			obj.style.left	   = posObj.left + 'px';
 		}
 	};
+	/**
+	 * 将特定的占位符中的元素设置为File Input元素
+	 * @param {string} | {HTMLElement} 目标元素的ID或者本身（作为DOM元素）
+	 * @param {Object} aStyleOption 可以给a元素添加的额外样式（会覆盖原有样式）
+	 * @param {Object} fileStyleOption 可以给inputFile元素添加的额外样式（会覆盖原有样式）
+	 */
+	N.style.setAsFileInput     = function(o, aStyleOption, fileStyleOption){
+		o            = N.dom.checkIsDom(o);
+		var aStyle   = 'background: url(about:blank) no-repeat scroll transparent;';
+		aStyle      += 'border: 1px solid gray;';
+		aStyle      += 'color: #333333;';
+		aStyle      += 'display: inline-block;';
+		aStyle      += 'font-size: 14px;';
+		aStyle      += 'height: 22px;';
+		aStyle      += 'line-height: 22px;';
+		aStyle      += 'margin: 0 5px;';
+		aStyle      += 'text-align: center;';
+		aStyle      += 'text-decoration: none;';
+		aStyle      += 'width: 55px;';
+		if(aStyleOption){
+			for(var i in aStyleOption){
+				aStyle += (i + ': ' + aStyleOption[i] + ';');
+			}
+		}
+		var aHref    = N.browser.ie == 6 ? '###' : 'javascript:void(0);';
+		o.innerHTML  = '<a href="' + aHref + '" style="' + aStyle + '">浏览...</a>';
+		var inputTopStyle =  N.browser.ie == 8 ? '6px' : (N.browser.ie == 7 ? '2px' : '1px');
+		inputTopStyle     = N.browser.ie == 9 ? '7px' : inputTopStyle;
+		var inputStyles   = 'cursor: pointer;';
+		inputStyles      += 'display: inline-block;';
+		inputStyles      += 'opacity: 0;';
+		inputStyles      += 'filter: alpha(opacity:0);';
+		inputStyles      += 'position: relative;';
+		inputStyles      += 'left: -61px;';
+		inputStyles      += 'width: 55px;';
+		inputStyles      += 'height: 22px;';
+		inputStyles      += 'top:' + inputTopStyle + ';';
+		if(fileStyleOption){
+			for(var j in fileStyleOption){
+				inputStyles += (j + ': ' + fileStyleOption[j] + ';');
+			}
+		}
+		o.innerHTML      += '<input type="file" id="GW-Upload" name="GW-Upload" style="' + inputStyles + '"/>';
+	};
 	
 	
 	/*EVENT事件处理*/
@@ -795,6 +862,51 @@
 			result = parseInt(result);
 		return String(result) + '%';
 	};
+	/**
+	 * 将整数小数点后面多余的0去除
+	 * @param {number} inputData 目标数字
+	 * 
+	 * @returns {number} 返回去0后的整数 
+	 */
+	N.math.trim0            = function(inputData){
+		if(parseInt(inputData) == inputData){
+			return parseInt(inputData);
+		}
+		return inputData;
+	};
+	/**
+	 * B, KB, MB, GB四者之间的转换函数（会根据实际大小自动转换为恰当的单位）
+	 * （其实准确点应该是B, KiB, MiB, GiB，不过平常人们说习惯了B, KB, MB, GB，这两者的进制不同，前者1024，后者1000）
+	 * @param {number} | {string} inputData 目标数字
+	 * @param {string} originalUnit 原始单位（就是输入的inputData的单位，默认为B）
+	 * @param {number} decimals 保留几位小数（默认为两位小数）
+	 * @param {boolean} noUnit 返回值中不带单位（默认为false，带单位）
+	 *
+	 * @returns {string} 处理后的数字
+	 */
+	N.math.unitTransformer  = function(inputData, originalUnit, decimals, noUnit){
+		if(inputData        == undefined || inputData == '')
+			return;
+		inputData           = Number(inputData);
+		originalUnit || (originalUnit = 'B');
+		decimals     || (decimals     = 2);
+		noUnit       || (noUnit       = false);
+		var Units           = ['B', 'KB', 'MB', 'GB'];
+		var Step            = 1024;
+		var mePos           = '';
+		var meUnit          = originalUnit;
+		for(var i = 0, len  = Units.length; i < len; i ++){
+			if(Units[i] == originalUnit){
+				mePos       = i;
+				break;
+			}
+		}
+		while(inputData >= Step){//向前进
+			inputData   /= Step;
+			meUnit       = Units[++ mePos];
+		}
+		return N.math.trim0(inputData.toFixed(decimals)) + (noUnit ? '' : meUnit);
+	};
 	
 	
 	/*工具库*/
@@ -886,7 +998,7 @@
 	 *		}
 	 *	});
 	 *	testTimer.fire();//激活控制器
-	 *	testTimer.abort();//停止控制器
+	 *	testTimer.abort();//停止控制器(可以在此指定返回值)
 	 */
 	N.timer.timerHandler = function(options){
 		/*callBack, interval, noFirst, times*/
@@ -917,9 +1029,43 @@
 				me.callBack(me.counter); me.counter ++;
 			}, me.interval);
 		},
-		abort : function(){
+		abort : function(returnFlag){
 			var me = this;
 			window.clearInterval(me.timer);
+			return returnFlag;
+		}
+	};
+	/**
+	 * 简易监控函数，依赖于N.timer.timerHandler
+	 * @param {number} options.interval 监控函数调用的间隔时间
+	 * @param {function} options.monitorFunc(index) 监控函数体，会将调用次数作为传入参数，在调用的过程中，若此函数返回true，则代表监控条件成功，监控结束，调用callBack回调；若此函数返回false，则代表监控失败，继续进行监控
+	 * @param {function} options.callBack 总回调函数，在监控函数返回true的时候调用
+	 */
+	N.timer.monitor   = function(options){
+		var me        = this;
+		me.init(options);
+	};
+	N.timer.monitor.prototype = {
+		init: function(options){
+			var me    = this;
+			for(var i in options){
+				me[i] = options[i];
+			}
+		},
+		fire: function(){
+			var me   = this;
+			me.timer = new N.timer.timerHandler({
+				interval: me.interval,
+				noFirst : false,
+				callBack: function(index){
+/*					if(me.monitorFunc(index)){
+						me.timer.abort();
+						me.callBack();
+					}*/
+					me.monitorFunc(index) && me.timer.abort(true) && me.callBack();
+				}
+			});
+			me.timer.fire();
 		}
 	};
 	
@@ -933,7 +1079,8 @@
 	 * @param {string} options.ajaxRequestUrl 请求的目标url 
 	 * @param {string} options.method(optional) 请求方法（默认为GET，也可以为POST）
 	 * @param {string} options.data(optional) POST的数据（在POST方法下有效，GET方法可以在url中附加数据），格式：a=aaa&b=bbb&c=ccc
-	 * @param {function} options.callBack 回调函数（会把当前请求的xhr对象作为参数传入）
+	 * @param {function} options.beforeRequest 每次请求的前调函数（会把当前请求的xhr对象作为第一个参数传入）
+	 * @param {function} options.callBack 回调函数（会把当前请求的xhr对象作为第一个参数传入，第二个参数为xhr.responseText）
 	 *
 	 * @grammar
      *	var testAjax = new xxx.ajax.ajaxHandler({
@@ -952,7 +1099,7 @@
 			return;
 		options.delayTime  = options.delayTime  || 5 * 1000;
 		options.retryTimes = (options.retryTimes + 1) || (10 + 1);
-		if('function' !== typeof options.callBack)
+		if('function' !== typeof options.callBack || 'function' !== typeof options.beforeRequest)
 			return;
 		this.init(options);/*init*/
 	};
@@ -962,6 +1109,9 @@
 			for(var i in options){
 				me[i] = options[i];
 			}
+			/*加载ajax引擎，使用tangram函数库*/
+			N.loader.loadBaseTangram('baidu.ajax.request');
+			me.ajaxEngine = baidu.ajax.request;
 			me.resetReqPar();
 		},
 		resetReqPar  : function(){
@@ -980,22 +1130,31 @@
 				interval : me.delayTime,
 				times    : me.retryTimes,
 				callBack : function(index){
-					me.xhrs[index] = N.EXTERNALTOOLS.ajax.request(me.ajaxRequestUrl, {
+					me.xhrs[index] = me.ajaxEngine(me.ajaxRequestUrl, {
 						method          : me.method,
 						data            : me.data,
 						onbeforerequest : function(xhr){
 							try{
-								if(index != 0 && index > 0)
+								if(index == 0){
+									me.updateReqPar();
+									me.beforeRequest(xhr);	
+								}
+								if(index != 0 && index > 0){
 									me.xhrs[index - 1].abort();/*Abort The Previous One*/
-								if(index == me.retryTimes - 1)
-									xhr.abort();/*Abort The Last One*/
+									if(index == me.retryTimes - 1){
+										xhr.abort();/*Abort The Last One*/
+										N.debuger.throwit('WARN', N.MESSAGES.noResponse + me.ajaxRequestUrl);
+										return;
+									}
+									me.updateReqPar();
+									me.beforeRequest(xhr);
+								}
 								}catch(e){};
-							me.updateReqPar();
 						},
 						onsuccess       : function(xhr, msg){
 							me.resetReqPar();
 							me.ajaxTimer.abort();
-							me.callBack(xhr);
+							me.callBack(xhr, msg);
 						},
 						onfailure       : function(xhr){
 							//do nothing;Auto Start The Next One
@@ -1004,6 +1163,119 @@
 				}
 			});
 			me.ajaxTimer.fire();
+		}
+	};
+	/**
+	 * 简易式轮询式请求
+	 * @param {string} options.requestUrl 请求的url
+	 * @param {function} options.ensureFunc(xhr, reText) 监控函数，在返回false的状态下会再次发起请求，直至返回true，就会停止请求，轮询结束（当前请求对象xhr和当前返回的reText(xhr.responseText)作为传入参数）
+	 * @param {function} options.beforeRequest(xhr) 整体轮询请求开始之前的前调函数(会将当前xhr请求对象作为传入参数)
+	 * @param {function} options.stepBeforeRequest(xhr, counter) 单步前调函数(会将当前xhr请求对象作为传入参数，第二个参数为此次轮询请求计数，从1开始)
+	 * @param {function} options.stepCallBackFunc(xhr, reText) 单步回调函数（当前请求对象xhr和当前返回的reText(xhr.responseText)作为传入参数）
+	 * @param {function} options.afterRequest(xhr, reText) 整体轮询结束后的回调函数（当前请求对象xhr和当前返回的reText(xhr.responseText)作为传入参数）
+	 * @param {boolean} options.advancedMode 是否开启高级模式（高级模式具有了单次请求的错误及其延迟，及其重复次数处理，默认不开启）
+	 * 
+	 * 在开启高级模式下配置advanceOptions参数
+	 * @param {number} advanceOptions.delayTime 单次请求等待的延迟时间（最长请求时间，毫秒）
+	 * @param {number} advanceOptions.retryTimes 单次请求失败后重复请求最大次数
+	 */
+	/*静态计数器*/
+	N.ajax.counter              = {};
+	N.ajax.takeTurnsToRequester = function(options, advanceOptions){
+		if(options.requestUrl  == '' || options.requestUrl == undefined)
+			return;
+		options.ensureFunc        || (options.ensureFunc = function(){});
+		options.beforeRequest     || (options.beforeRequest = function(){});
+		options.stepBeforeRequest || (options.stepBeforeRequest = function(){});
+		options.stepCallBackFunc  || (options.stepCallBackFunc = function(){});
+		options.afterRequest      || (options.afterRequest = function(){});
+		options.advancedMode      || (options.advancedMode = false);
+		
+		/*Load Ajax Engine*/
+		N.loader.loadBaseTangram('baidu.ajax.request');
+		this.ajaxEngine        || (this.ajaxEngine = baidu.ajax.request);
+		this.requestUrl        || (this.requestUrl = options.requestUrl);
+		this.ensureFunc        || (this.ensureFunc = options.ensureFunc);
+		this.beforeRequest     || (this.beforeRequest = options.beforeRequest);
+		this.stepBeforeRequest || (this.stepBeforeRequest = options.stepBeforeRequest);
+		this.stepCallBackFunc  || (this.stepCallBackFunc = options.stepCallBackFunc);
+		this.afterRequest      || (this.afterRequest = options.afterRequest);
+		this.advancedMode      || (this.advancedMode = options.advancedMode);
+		this.ops               || (this.ops = options);
+		
+		/*高级模式*/
+		if(this.advancedMode){
+			advanceOptions || (advanceOptions = {});
+			advanceOptions.delayTime  || (advanceOptions.delayTime = 3 * 1000);
+			advanceOptions.retryTimes || (advanceOptions.retryTimes = 4);
+			
+			this.delayTime  || (this.delayTime = advanceOptions.delayTime);
+			this.retryTimes || (this.retryTimes = advanceOptions.retryTimes);
+			this.adops      || (this.adops = advanceOptions);
+		}
+		if(N.ajax.counter[this.requestUrl] === undefined)
+			N.ajax.counter[this.requestUrl] = 0;
+	};
+	N.ajax.takeTurnsToRequester.prototype = {
+		run: function(){
+			var me = this;
+			N.ajax.counter[me.requestUrl] ++;
+			if(me.advancedMode){
+				/*采用高级模式*/
+				new N.ajax.ajaxHandler({
+					delayTime      : me.delayTime,
+					retryTimes     : me.retryTimes,
+					ajaxRequestUrl : me.requestUrl,
+					beforeRequest  : function(xhr){
+						/*整体前调函数*/
+						if(N.ajax.counter[me.requestUrl] == 1){
+							me.beforeRequest(xhr);
+						}
+						/*单步前调函数*/
+						me.stepBeforeRequest(xhr, N.ajax.counter[me.requestUrl]);
+					},
+					callBack       : function(xhr, reText){
+						if(!me.ensureFunc(xhr, reText)){
+							/*继续轮询*/
+							me.stepCallBackFunc(xhr, reText);
+							/*初始化及其开始下次请求*/
+							new N.ajax.takeTurnsToRequester(me.ops, me.adops).run();
+						}else if(me.ensureFunc(xhr, reText)){
+							/*条件满足，停止轮询*/
+							/*最后一次单步回调*/
+							me.stepCallBackFunc(xhr, reText);
+							/*轮询结束回调函数*/
+							me.afterRequest(xhr, reText);
+						}
+					}
+				}).startRequest();
+			}else{
+				/*采用一般模式*/
+				me.ajaxEngine(me.requestUrl, {
+					onbeforerequest : function(xhr){
+						/*整体前调函数*/
+						if(N.ajax.counter[me.requestUrl] == 1){
+							me.beforeRequest(xhr);
+						}
+						/*单步前调函数*/
+						me.stepBeforeRequest(xhr, N.ajax.counter[me.requestUrl]);
+					},
+					onsuccess : function(xhr, reText){
+						if(!me.ensureFunc(xhr, reText)){
+							/*继续轮询*/
+							me.stepCallBackFunc(xhr, reText);
+							/*初始化及其开始下次请求*/
+							new N.ajax.takeTurnsToRequester(me.ops).run();
+						}else if(me.ensureFunc(xhr, reText)){
+							/*条件满足，停止轮询*/
+							/*最后一次单步回调*/
+							me.stepCallBackFunc(xhr, reText);
+							/*轮询结束回调函数*/
+							me.afterRequest(xhr, reText);
+						}
+					}
+				});	
+			}
 		}
 	};
 })(window);
