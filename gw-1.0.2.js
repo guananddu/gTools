@@ -10,8 +10,8 @@
 	/*版本号*/
 	var version   = '1.0.2';
 	/*声明常用局部变量*/
-	var top       = top,
-		window    = window,
+	var window    = window,
+		top       = window.top,
 		document  = window.document,
 	 	undefined = window.undefined,
 		navigator = window.navigator,
@@ -27,6 +27,10 @@
 	/*命名空间处理，默认为$GW$命名空间*/
 	var NS		  = $nameSpace || '$GW$',
 		execCode  = 'var N = window.' + NS + ' = window.' + NS + ' || {version: "' + version + '"};';
+	
+	/*作为GW模块之间的通信，获取命名空间*/
+	top.__$_GWNAMESPACE_$__ = NS;
+	
 	/*
 		执行语句：
 		var N     = window.$GW$ = window.$GW$ || {version: '1.0.1'};
@@ -44,7 +48,7 @@
 				eval(execCode);
 				execCode = 'window.' + ns + ' = N;';
 				eval(execCode);
-				NS       = ns;
+				top.__$_GWNAMESPACE_$__ = NS  = ns;
 			}else{
 				N.debuger.throwit('ERROR', N.MESSAGES.wrongNameSpaceFormat + ns);
 			}
@@ -55,6 +59,9 @@
 	
 	/*Debuger Or Regular*/
 	N.debugerFlag        = true;
+	
+	/*Use Advanced Loader?*/
+	N.useAdvancedLoader  = true;
 	
 	/*Server*/
 	N.isPhpServer        = false;
@@ -189,19 +196,19 @@
 	/*外部库的配置路径，配置默认值，也可以由用户自己设置*/
 	N.EXTERNALTOOLS.config = N.EXTERNALTOOLS.config || {};
 	N.EXTERNALTOOLS.config = {
-			lazyLoader               : N.EXTERNALTOOLS.config.lazyload || 'tools/lazyload-2.0.3/lazyload-min.js',
-			LABjsLoader              : N.EXTERNALTOOLS.config.LABjsLoader || (
-					N.debugerFlag == true ? 'tools/LABjs-2.0.3/LAB-debug.min.js' : 'tools/LABjs-2.0.3/LAB.min.js'
-			),
-			baidu                    : N.EXTERNALTOOLS.config.baidu || 'tools/tangram-1.3.9/tangram-1.3.9.js',
-			baiduBaseJsImporter      : N.EXTERNALTOOLS.config.baiduBaseJsImporter || 'tools/tangram-1.3.9/fragment/Tangram-base/src/import_.js',
-			baiduBasePhpImporter     : N.EXTERNALTOOLS.config.baiduBasePhpImporter || 'tools/tangram-1.3.9/fragment/Tangram-base/src/import.php',/*php服务器下可以直接请求此文件*/
-			baiduComponentJsImporter : N.EXTERNALTOOLS.config.baiduComponentJsImporter || 'tools/tangram-1.3.9/fragment/Tangram-component/src/import_.js',
-			baiduComponentPhpImporter: N.EXTERNALTOOLS.config.baiduComponentPhpImporter || 'tools/tangram-1.3.9/fragment/Tangram-component/src/import.php'
+			lazyLoader               : 'tools/lazyload-2.0.3/lazyload-min.js',
+			LABjsLoader              : N.debugerFlag == true ? 'tools/LABjs-2.0.3/LAB-debug.min.js' : 'tools/LABjs-2.0.3/LAB.min.js',
+			baidu                    : 'tools/tangram-1.3.9/tangram-1.3.9.js',
+			baiduBaseJsImporter      : 'tools/tangram-1.3.9/fragment/Tangram-base/src/import_.js',
+			baiduBasePhpImporter     : 'tools/tangram-1.3.9/fragment/Tangram-base/src/import.php',/*php服务器下可以直接请求此文件*/
+			baiduComponentJsImporter : 'tools/tangram-1.3.9/fragment/Tangram-component/src/import_.js',
+			baiduComponentPhpImporter: 'tools/tangram-1.3.9/fragment/Tangram-component/src/import.php',
+			extensions               : 'extensions/'
 	};
 	
 	/*作为缓冲来防止重复加载*/
-	N.EXTERNALTOOLS.buffer  = {};
+	N.EXTERNALTOOLS.baiduBuffer  = {};
+	N.EXTERNALTOOLS.gwBuffer     = {};
 	
 	/**
 	 * 整个gw基于lazyLoader和LABjsLoader来加载各种其他的类库和自身的扩展组件
@@ -235,7 +242,7 @@
 		*/
 	};
 	/**
-	 * 加载并运行JS文件(XHR)
+	 * 加载并运行JS文件(XHR)（可以保证执行顺序）
 	 * @param {string} || {array} scriptSrcArr 需要加载的js文件路径字符串（单个文件）或者数组（多个文件）
 	 * @param {boolean} async xhr请求是否异步（true:异步，false:同步）
 	 * @param {boolean} hideEval 是否 不将xhr获得的js脚本放入head标签中，true:隐藏脚本加载，不将脚本放入head标签；false:将js脚本放入head中（默认）
@@ -307,14 +314,16 @@
 		}
 	};
 	
-	/*开始整合lazyLoader和LABjsLoader，阻塞式整合，隐含式加载*/
-	N.debuger.throwit('INFO', N.MESSAGES.importExternal + 'LazyLoad to N.loader.lazyLoader, and $LAB to N.loader.LABjsLoader.');
-	N.loader.simpleXhrLoader([N.EXTERNALTOOLS.config.lazyLoader, N.EXTERNALTOOLS.config.LABjsLoader], false, true);
-	try{
-		N.loader.lazyLoader  = LazyLoad; LazyLoad = null;
-		N.loader.LABjsLoader = $LAB;     $LAB     = null;
-	}catch(e){
-		N.debuger.throwit('ERROR', N.MESSAGES.loaderLoadedFailed);
+	/*开始整合lazyLoader和LABjsLoader，阻塞式整合，隐含式加载，只有在启用高级加载模式的时候才会执行*/
+	if(N.useAdvancedLoader){
+		N.debuger.throwit('INFO', N.MESSAGES.importExternal + 'LazyLoad to N.loader.lazyLoader, and $LAB to N.loader.LABjsLoader.');
+		N.loader.simpleXhrLoader([N.EXTERNALTOOLS.config.lazyLoader, N.EXTERNALTOOLS.config.LABjsLoader], false, true);
+		try{
+			N.loader.lazyLoader  = LazyLoad; LazyLoad = null;
+			N.loader.LABjsLoader = $LAB;     $LAB     = null;
+		}catch(e){
+			N.debuger.throwit('ERROR', N.MESSAGES.loaderLoadedFailed);
+		}
 	}
 	
 	/*开始整合Baidu Tangram框架类库，阻塞式整合，附加式加载，全加载*/
@@ -333,12 +342,12 @@
 	 * @param {boolean} noCahce 是否允许缓存文件（true: 不允许缓存；false: 可以缓存）
 	 */
 	N.loader.loadBaseTangram     = function(namespace, noCache){
-		if(N.EXTERNALTOOLS.buffer[namespace]){
+		if(N.EXTERNALTOOLS.baiduBuffer[namespace]){
 			N.debuger.throwit('INFO', N.MESSAGES.hadLoadedIt + namespace);
 			return;
 		}
 		if(N.isPhpServer){//PHP服务器
-			N.EXTERNALTOOLS.buffer[namespace] = 1;
+			N.EXTERNALTOOLS.baiduBuffer[namespace] = 1;
 			return N.loader.simpleXhrLoader(N.EXTERNALTOOLS.config.baiduBasePhpImporter + '?f=' + namespace, false, false, noCache);
 		}else{
 /*			N.loader.lazyLoader.js(N.EXTERNALTOOLS.config.baiduBaseJsImporter, function(){
@@ -346,7 +355,7 @@
 			});不能使用异步加载*/
 			N.loader.simpleXhrLoader(N.EXTERNALTOOLS.config.baiduBaseJsImporter, false, false, noCache);
 			window.Import(namespace);
-			N.EXTERNALTOOLS.buffer[namespace] = 1;
+			N.EXTERNALTOOLS.baiduBuffer[namespace] = 1;
 		}
 	};
 	
@@ -356,12 +365,12 @@
 	 * @desc 此函数使用性不强，以其发100个请求来获取一个组件，不如压缩代码
 	 */
 	N.loader.loadComponentTangram = function(namespace, noCache){
-		if(N.EXTERNALTOOLS.buffer[namespace]){
+		if(N.EXTERNALTOOLS.baiduBuffer[namespace]){
 			N.debuger.throwit('INFO', N.MESSAGES.hadLoadedIt + namespace);
 			return;
 		}
 		if(N.isPhpServer){//PHP服务器
-			N.EXTERNALTOOLS.buffer[namespace] = 1;
+			N.EXTERNALTOOLS.baiduBuffer[namespace] = 1;
 			return N.loader.simpleXhrLoader(N.EXTERNALTOOLS.config.baiduComponentPhpImporter + '?f=' + namespace, false, false, noCache);
 		}else{
 /*			N.loader.lazyLoader.js(N.EXTERNALTOOLS.config.baiduComponentJsImporter, function(){
@@ -369,9 +378,28 @@
 			});不能使用异步加载*/
 			N.loader.simpleXhrLoader(N.EXTERNALTOOLS.config.baiduComponentJsImporter, false, false, noCache);
 			window.Import(namespace);
-			N.EXTERNALTOOLS.buffer[namespace] = 1;
+			N.EXTERNALTOOLS.baiduBuffer[namespace] = 1;
 		}
 	};
+	
+	/**
+	 * GW加载自身扩展模块的函数（可以保证执行顺序）
+	 * @param {string} | {array} extensions 扩展模块名（string.js的话，extensions = 'string'）
+	 */
+	N.loader.loadExtensions          = function(extensions){
+		/*单个文件*/
+		if(toString.call(extensions) == '[object String]')
+			extensions               = [extensions];
+		for(var i = 0, len = extensions.length; i < len; i ++){
+			if(N.EXTERNALTOOLS.gwBuffer[extensions[i]]){
+				N.debuger.throwit('INFO', N.MESSAGES.hadLoadedIt + extensions[i]);
+				continue;
+			}
+			var extension  = extensions[i] + '.js';
+			N.loader.simpleXhrLoader((N.EXTERNALTOOLS.config.extensions + extension), false, true, true);
+			N.EXTERNALTOOLS.gwBuffer[extensions[i]] = 1;
+		}
+	}
 	
 	/*DOM基础方法*/
 	N.dom            = N.dom || {};
