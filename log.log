@@ -1,0 +1,29 @@
+gTools.php 传参说明
+
+/**
+ * gTools.php将作为gTools工具箱的PHP自动合并&&压缩工具
+ *
+ * 对应的配置文件则在同级目录下的gTools.xml文件
+ * 调用方法：
+ * 		<script src="..../gTools.php" type="text/javascript"></script>
+ * 可以接受的参数（GET传值）：
+ *		conf {string} (gTools default) 需要加载的配置文件名（省去扩展名），默认是gTools
+ * 		type {string} [js || css] (js default) 说明合并&&压缩文件的类型
+ * 		group {string} [groupid] (可以为空) 与gTools.xml中的某一个groupid相对应
+ * 		engine {string} [yui || cc] (yui default) 使用的压缩引擎（YUI Compressor或者Closure Compiler）
+ *      nominify {number} [1 || null(不传)] (null default) 默认情况下会自动压缩代码，若传值为1则不压缩代码
+ *		nogtools {number} [1 || null] (null default) 默认情况下，在进行多文件压缩的时候会自动将gTools.js文件合并压缩，如果不需要压缩gTools.js，将此项设置为1
+ *		encode {number} [1 || null] (null default) 默认不开启此功能，如果开启，则会把缓存名称进行加密，只应用于多文件合并&&压缩的时候
+ *		redirect {number} [1 || null] (null default) 默认不使用重定向获取缓存内容，若设置为1，则会进行重定向，可以避免文件过大的file_get_contents
+ *
+ * 合并&&压缩后的重命名规则：
+ *		gTools.js -> gTools.min.js;
+ *      example.css -> example.min.css;
+ *      one.js + two.js -> one-two.min.js;
+ *      one.css + two.css -> one-two.min.css.
+ *
+ * 传参规则：
+ * 1>若type和group这两个参数都没有传递，则直接返回gTools.js中的内容；
+ * 2>type和group参数必须同时存在；
+ * 3>其余的参数可以按需传递
+ */

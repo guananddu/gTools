@@ -1,0 +1,59 @@
+/**
+ * table.css GT的table组件小库样式文件
+ */
+
+/**
+ * table外围的容器样式
+ */
+._gtSimpleTableClass {
+	padding          : 5px;
+	margin           : 5px; 
+	/*background-color : #EFFAFD;*/
+	border           : 1px solid #D8E8ED;
+}
+
+/**
+ * 表头td样式
+ */
+._gtSimpleTableHeaderClass td {
+	background-color : #EDEEED;
+	border           : 1px solid #D8E8ED;
+	color            : #888;
+	height           : 25px;
+	text-align       : center;
+	vertical-align   : middle;
+	width            : 40px;
+}
+
+/**
+ * 表身样式
+ */
+._gtSimpleTableBodyClass {
+	/*滚动条按17px算，兼容性还算可以*/
+	overflow         : auto;
+}
+
+/**
+ * 表身td样式
+ */
+._gtSimpleTableBodyClass td {
+	border           : 1px solid #D8E8ED;
+	color            : #000;
+	height           : 30px;
+	text-align       : center;
+	vertical-align   : middle;
+	width            : 40px;
+}
+
+/**
+ * 表尾td样式
+ */
+._gtSimpleTableFooterClass td {
+	background-color : #EDEEEC;
+	border           : 1px solid #D8E8ED;
+	color            : #888;
+	height           : 25px;
+	text-align       : center;
+	vertical-align   : middle;
+	width            : 40px;
+}

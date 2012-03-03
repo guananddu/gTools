@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<title>gTools Test</title>
+		<link href="gTools.php?type=css&group=css" type="text/css" rel="stylesheet"/>
+		<script src="gTools.php?type=js&group=extensions&engine=cc&nominify=1" type="text/javascript"></script>
+		<script src="gTools.php?type=js&group=components&nogtools=1&engine=cc&nominify=1" type="text/javascript"></script>
+	</head>
+	
+	<body>
+		<div id="gtTable" style="width:285px;"></div>
+		<script type="text/javascript">
+			var testTable = new $GT$.coms.sTable('gtTable', {
+				maxRowsLength: 6,
+				header : [
+					'表头1', 
+					'表头2', 
+					function(td, tr, inx){
+						/*
+						td.style.width = '100px';
+						td.style.backgroundColor = 'gray';
+						td.style.height = '50px';*/
+						return '表头3';
+					}, 
+					function(td, tr, inx){
+						td.style.backgroundColor = 'pink';
+						return '表头4';
+					},
+					'表头5',
+					'表头6'
+				],
+				footer : [
+					'表尾1',
+					'表尾2',
+					function(td, tr, inx){
+						td.style.backgroundColor = 'pink';
+						return '表尾3';
+					},
+					'表尾4',
+					'表尾5',
+					'表尾6'
+				],
+				rawData : {a:[['a', 'b', 'c', 'd', 's', 'm'], ['d', 'e', 'f', 'g', 's', 's']]},
+				dataAdapter : function(input){
+					return input.a;
+				},
+				bodyFuncs : [
+					,
+					,
+					function(thisCell, td, tr, i, j){
+						if(thisCell == 'f'){
+							td.style.backgroundColor = 'yellow';
+							return 'f!!';
+						}
+					}
+				],
+				cellFunc : function(thisCell, td, tr, i, j){
+					if(thisCell == 'a' || thisCell == 'b'){
+						td.style.color = 'red';
+					}
+					if(thisCell == 'f'){
+						td.style.color = 'blue';
+						td.style.fontWeight = 'bold';
+					}
+				}
+			});
+			testTable.render();
+			setTimeout(function(){
+				testTable.empty();
+				testTable.setRawData({a:[['a', 'b', 'c', 's', 'x', 'v'], ['d', 'e', 'f', 's', 'q', 'a'], ['s', 'xx', 'ss', 'z', 'f', 'a'], ['s', 'xx', 'ss', 'z', 'f', 'a'], ['s', 'xx', 'ss', 'z', 'f', 'a'], ['s', 'xx', 'ss', 'z', 'f', 'a'], ['s', 'xx', 'ss', 'z', 'f', 'a'], ['s', 'xx', 'ss', 'z', 'f', 'a'], ['s', 'xx', 'ss', 'z', 'f', 'a'], ['s', 'xx', 'ss', 'z', 'f', 'a'], ['s', 'xx', 'ss', 'z', 'f', 'a'], ['s', 'xx', 'ss', 'z', 'f', 'a'], ['s', 'xx', 'ss', 'z', 'f', 'a'], ['s', 'xx', 'ss', 'z', 'f', 'a'], ['s', 'xx', 'ss', 'z', 'f', 'a']]});
+				testTable.render();
+			}, 2000);
+		</script>
+	</body>
+</html>
