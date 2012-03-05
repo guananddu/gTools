@@ -238,6 +238,20 @@
 	};
 	//设置快捷方式
 	N.request = N.ajax.request;
+	
+	/**
+	 * 在ajax的基础上增加失败，和超时处理。失败/超时 -> 等待time -> 再次调用，可以设置重复的最大请求次数
+	 * @param url 参看N.ajax.request函数的参数介绍
+	 * 增加：
+	 * @param {Number} opt_options[interval] 此次请求失败/超时结束到下次开始之间的间隔时间（毫秒计）
+	 * @param {Number} opt_options[times] 失败后重复请求的次数，为空则持续进行请求
+	 */
+	N.ajax.advancedRequester = function(url, opt_options){
+		if(typeof url      !== 'string')
+			throw new Error('N.ajax.advancedRequester expects a String as the first parameter!');
+		
+		N.ajax.request(url, opt_options);
+	};
 
 	/**
 	 * 简易Ajax控制器，Ajax引擎暂时使用的是Tangram Ajax控制器（已经独立2012.03.03）

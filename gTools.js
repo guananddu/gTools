@@ -1149,6 +1149,67 @@
 			me.timer.fire();
 		}
 	};
+	/**
+	 * 简易轮流执行函数
+	 * @param {Array} funcs 一个装着函数的数组，每个函数调用的时候，函数体内this指向实例对象本身，并且传回index索引，0开始
+	 * @param {Number} interval 间隔时间，秒计，忽略的情况下将采用默认的20毫秒
+	 */
+	N.timer.takeTurns2Run = function(){
+		//私有变量
+		var _funcs, _interval, _timer, _counter;
+		var Constructor   = function(funcs, interval){
+			//先检查值的设置情况，没有的话，设置默认值
+			_funcs        = funcs || [];
+			_interval     = interval * 1000 || 20;
+			//再检查值的类型
+			if(toString.call(_funcs) !== '[object Array]')
+				throw new Error('N.timer.takeTurns2Run expects an array of Functions!');
+			if(toString.call(_interval) !== '[object Number]')
+				throw new Error('N.timer.takeTurns2Run expects a Number type interval!');
+		};
+		Constructor.prototype = function(){
+			return {
+				fire: function(){
+					var me   	  = this;
+					var _funcsLen = _funcs.length;
+					_counter      = 0;
+					_timer = window.setInterval(function(){
+						if(_counter === _funcsLen)
+							_counter = 0;
+						_funcs[_counter ++].call(me, _counter - 1);
+					}, _interval);
+				},
+				stop: function(){
+					var me = this;
+					if(_timer)
+						window.clearInterval(_timer);
+				}
+			};
+		}();
+		return Constructor;
+	}();
+	/**
+	 * 只会执行特定次数的函数
+	 * @param {String} identifier 代码段的唯一标识符（必须）
+	 * @param {Function} func 函数段，最好使用function(index){}形式，回传索引，0开始
+	 * @param {Number} times 执行的次数，默认为1次
+	 */
+	N.timer.runJustNtimes = function(identifier, func, times){
+		times             = times || 1;
+		if(toString.call(identifier) !== '[object String]')
+			throw new Error('N.timer.runJustNtimes expects a String as the first parameter!');
+		if(toString.call(func)       !== '[object Function]')
+			throw new Error('N.timer.runJustNtimes expects a Function as the second parameter!');
+		if(toString.call(times)      !== '[object Number]')
+			throw new Error('N.timer.runJustNtimes expects a Number as the third parameter!');
+		var me        = arguments.callee;
+		me.statements = me.statements || {};
+		me.statements[identifier] = me.statements[identifier] || [func, times, 0];
+		if(me.statements[identifier][2] === times)
+			return;
+		//Run
+		me.statements[identifier][0](me.statements[identifier][2] ++);
+	};
 	
 	/**
 	 * gTools的简易缓存工具
