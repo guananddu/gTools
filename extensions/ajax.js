@@ -245,12 +245,27 @@
 	 * 增加：
 	 * @param {Number} opt_options[interval] 此次请求失败/超时结束到下次开始之间的间隔时间（毫秒计）
 	 * @param {Number} opt_options[times] 失败后重复请求的次数，为空则持续进行请求
+	 * @warn! 不能再次设置opt_options中的超时/失败两个事件
 	 */
 	N.ajax.advancedRequester = function(url, opt_options){
 		if(typeof url      !== 'string')
 			throw new Error('N.ajax.advancedRequester expects a String as the first parameter!');
-		
+		if(opt_options.onfailure || opt_options.ontimeout)
+			throw new Error('N.ajax.advancedRequester doesn\'t expect you to set onfailure/ontimeout event!');
+		opt_options.onfailure = opt_options.ontimeout = reRequest;
+		var me = arguments.callee;
+		function reRequest(){
+			if(opt_options.times){
+				if(me._counter === opt_options.times)
+					return;
+			}
+			setTimeout(function(){
+				N.ajax.request(url, opt_options);
+				me._counter ++;
+			}, opt_options.interval);
+		};
 		N.ajax.request(url, opt_options);
+		me._counter = 1;
 	};
 
 	/**
