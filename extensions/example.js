@@ -5,7 +5,7 @@
 	/**
 	 * 获取GT命名空间
 	 */
-	var N  = eval('window.' + window.top.__$_GTNAMESPACE_$__);
+	var N  = eval('window.' + window.__$_GTNAMESPACE_$__);
 	
 	/*Start Extensions:*/
 	N.extensionsTest = 'Test!!!!I am a test!!!';

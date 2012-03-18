@@ -5,7 +5,7 @@
 	/**
 	 * 获取GT命名空间
 	 */
-	var N  = eval('window.' + window.top.__$_GTNAMESPACE_$__);
+	var N  = eval('window.' + window.__$_GTNAMESPACE_$__);
 	
 	/*oo 面向对象开发的相关函数（及其类）*/
 	N.oo   = N.oo || {};

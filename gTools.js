@@ -28,7 +28,7 @@
 		execCode  = 'var N = window.' + NS + ' = window.' + NS + ' || {version: "' + version + '"};';
 	
 	/*作为GW模块之间的通信，获取命名空间*/
-	top.__$_GTNAMESPACE_$__ = NS;
+	window.__$_GTNAMESPACE_$__ = NS;
 	
 	/*
 		执行语句：
@@ -48,7 +48,7 @@
 				eval(execCode);
 				execCode = 'window.' + ns + ' = N;';
 				eval(execCode);
-				top.__$_GTNAMESPACE_$__ = NS  = ns;
+				window.__$_GTNAMESPACE_$__ = NS  = ns;
 			}else{
 				N.debuger.throwit('ERROR', _MESSAGES.wrongNameSpaceFormat + ns);
 			}

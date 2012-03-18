@@ -1,5 +1,4 @@
 /*!
- * GT的选择器暂时还是使用Sizzle吧
  * Sizzle CSS Selector Engine
  *  Copyright 2011, The Dojo Foundation
  *  Released under the MIT, BSD, and GPL Licenses.
@@ -1437,11 +1436,6 @@ var posProcess = function( selector, context, seed ) {
 
 // EXPOSE
 
-//window.Sizzle = Sizzle;
+window.Sizzle = Sizzle;
 
-/**
- * 获取GT命名空间
- */
-var N  = eval('window.' + window.__$_GTNAMESPACE_$__);
-N.selector = N.dom.selector = Sizzle;
 })();
