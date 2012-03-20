@@ -21,16 +21,24 @@
 	<!-- 外置工具 -->
     <group id="tools" rootdir="tools/">
 		<!-- js -->
-		<!-- 加载器 -->
-<!--  		<file type="js" src="LABjs-2.0.3/LAB.src.gt.js" />
-		<file type="js" src="LazyLoad-2.0.3/lazyload.gt.js" /> -->
+		<!-- 加载器，已加入GT命名空间 -->
+		<!--
+  		<file type="js" src="LABjs-2.0.3/LAB.src.gt.js" />
+		<file type="js" src="LazyLoad-2.0.3/lazyload.gt.js" />
+		-->
 		
-		<!-- IE6PNG修复工具DD_belatedPNG_0.0.8a -->
-<!--  		<file type="js" src="DD_belatedPNG_0.0.8a/DD_belatedPNG_0.0.8a.gt.js" /> -->
-		<!-- IE圆角工具 -->
-<!-- 		<file type="js" src="DD_roundies_0.0.2a/DD_roundies_0.0.2a.gt.js" /> -->
+		<!-- IE6PNG修复工具，已加入GT命名空间 -->
+		<!--
+  		<file type="js" src="DD_belatedPNG_0.0.8a/DD_belatedPNG_0.0.8a.gt.js" />
+		-->
+		<!-- IE圆角工具，已加入GT命名空间 -->
+ 		<!--
+		<file type="js" src="DD_roundies_0.0.2a/DD_roundies_0.0.2a.gt.js" />
+		-->
 		<!-- 粘贴板工具，未加入GT命名空间 -->
+		<!--
 		<file type="js" src="Zero-clipboard/ZeroClipboard.js" />
+		-->
     </group>
 	
 	<!-- 另外一种组合，直接合并成一个文件 -->

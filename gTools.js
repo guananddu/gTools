@@ -202,12 +202,10 @@
 	N.EXTERNALTOOLS.config = {
 			lazyLoader               : 'tools/lazyload-2.0.3/lazyload-min.js',
 			LABjsLoader              : N.debugerFlag == true ? 'tools/LABjs-2.0.3/LAB-debug.min.js' : 'tools/LABjs-2.0.3/LAB.min.js',
-			baidu                    : 'tools/tangram-1.3.9/tangram-1.3.9.js',
-			baiduBaseJsImporter      : 'tools/tangram-1.3.9/fragment/Tangram-base/src/import_.js',
-			baiduBasePhpImporter     : 'tools/tangram-1.3.9/fragment/Tangram-base/src/import.php',/*php服务器下可以直接请求此文件*/
-			baiduComponentJsImporter : 'tools/tangram-1.3.9/fragment/Tangram-component/src/import_.js',
-			baiduComponentPhpImporter: 'tools/tangram-1.3.9/fragment/Tangram-component/src/import.php',
-			sizzle                   : 'tools/Sizzle/sizzle.min.js',
+			//baidu                    : 'tools/Tangram-base-1.5.2/tangram-1.3.9.js',
+			baiduBaseJsImporter      : 'tools/Tangram-base-1.5.2/src/jsloader.js',
+			baiduBasePhpImporter     : 'tools/Tangram-base-1.5.2/src/import.php',/*php服务器下可以直接请求此文件*/
+			//sizzle                   : 'tools/Sizzle/sizzle.min.js',
 			extensions               : 'extensions/'
 	};
 	
@@ -369,7 +367,7 @@
 	 * @param {boolean} noCahce 是否允许缓存文件（true: 不允许缓存；false: 可以缓存）
 	 * @desc 此函数使用性不强，以其发100个请求来获取一个组件，不如压缩代码
 	 */
-	N.loader.loadComponentTangram = function(namespace, noCache){
+/* 	N.loader.loadComponentTangram = function(namespace, noCache){
 		if(_baiduBuffer[namespace]){
 			N.debuger.throwit('INFO', _MESSAGES.hadLoadedIt + namespace);
 			return;
@@ -378,14 +376,11 @@
 			_baiduBuffer[namespace] = 1;
 			return N.loader.simpleXhrLoader(N.EXTERNALTOOLS.config.baiduComponentPhpImporter + '?f=' + namespace, false, false, noCache);
 		}else{
-/*			N.loader.lazyLoader.js(N.EXTERNALTOOLS.config.baiduComponentJsImporter, function(){
-				window.Import(namespace);
-			});不能使用异步加载*/
 			N.loader.simpleXhrLoader(N.EXTERNALTOOLS.config.baiduComponentJsImporter, false, false, noCache);
 			window.Import(namespace);
 			_baiduBuffer[namespace] = 1;
 		}
-	};
+	}; */
 	
 	/**
 	 * GT加载自身扩展模块的函数（可以保证执行顺序）
