@@ -22,6 +22,12 @@
  *      one.js + two.js -> one-two.min.js;
  *      one.css + two.css -> one-two.min.css.
  *
+ * Tangram 的命名规则：
+ * 当导入：baidu.ajax.request, baidu.string.*时
+ * 连接及其压缩后的文件是：
+ * baidu.ajax.request-baidu.string.min.js
+ * 即省略了.*，最后添加min.js
+ *
  * 传参规则：
  * 1>若type和group这两个参数都没有传递，则直接返回gTools.js中的内容；
  * 2>type和group参数必须同时存在；
