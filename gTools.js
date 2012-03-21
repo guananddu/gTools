@@ -1,14 +1,14 @@
 /*
- * gTools JavaScript Library v1.0.3
+ * gTools JavaScript Library v1.5.1
  * Copyright 2011, guanwei. All rights reserved.
  * 
  * author: guanwei
- * version: 1.0.3
+ * version: 1.5.1
  * date: 2011/11/08
  */
 (function(window, $nameSpace){
 	/*版本号*/
-	var version   = '1.0.3';
+	var version   = '1.5.1';
 	/*声明常用局部变量*/
 	var top       = window.top,
 		document  = window.document,
@@ -18,7 +18,6 @@
 	/*声明核心方法*/
 	var  toString = Object.prototype.toString,
 		   hasOwn = Object.prototype.hasOwnProperty,
-			 //trim = String.prototype.trim,/*不支持IE系列*/
 			 push = Array.prototype.push,
 			slice = Array.prototype.slice,
 		  indexOf = Array.prototype.indexOf;
@@ -42,8 +41,6 @@
 			return;
 		if(undefined !== ns && null !== ns && '' !== ns && NS !== ns){
 			if(toString.call(ns) === '[object String]' && /^[^A-Za-z$_]|[^\w$]/.test(ns) === false){
-				/*切换，之前一直是使命名空间为undefined，现在直接删去*/
-				//execCode = 'window.' + NS + ' = undefined;';//old
 				execCode = 'delete window.' + NS;
 				eval(execCode);
 				execCode = 'window.' + ns + ' = N;';
@@ -60,24 +57,22 @@
 	/*Debuger Or Regular，是否打开调试模式*/
 	N.debugerFlag            = true;
 	
-	/*Use Advanced Selector，是否使用高级选择器模式*/
-	var _useAdvancedSelector = false;
-	
-	/*Use Advanced Loader?是否使用高级加载器，要区分私用方法和共用方法*/
-	var _useAdvancedLoader   = false;
-	
 	/*Server，是否使用PHP服务器*/
 	N.isPhpServer            = true;
 	
 	/*常用信息提示*/
 	var _MESSAGES            = {
-		importExternal      : 'Now Start To Import External Framework Tools: ',
 		wrongNameSpaceFormat: 'Wrong NameSpace Foramt, Expected: A-Z a-z 0-9 _ $, And don\'t not start with number: ',
-		loaderLoadedFailed  : 'Loader Load Failed!',
-		selectorLoadedFailed: 'Selector Load Failed!',
-		hadLoadedIt         : 'You had loaded this: ',
-		noResponse          : 'No Response About This Request Url: '
+		hadLoadedIt         : 'You had loaded this: '
 	};
+	
+    /**
+     * 得到本脚本文件对应的<script>标签元素
+     */
+    var _script = document.getElementsByTagName("SCRIPT");
+    _script     = _script[_script.length - 1];
+    var _t      = _script.src.replace(/\\/g, "/");
+    N.DIR       = (_t.lastIndexOf("/") < 0 ? "." : _t.substring(0, _t.lastIndexOf("/")));
 	
 	/*常用正则表达式*/
 	var _RE             = {};
@@ -117,7 +112,6 @@
 			ie          : _RE.browser.ie.test(ua) ? (document.documentMode || + RegExp['$1']) : undefined,
 			opera       : _RE.browser.opera.test(ua) ? + (RegExp['$6'] || RegExp['$2']) : undefined,
 			safari      : _RE.browser.safari.test(ua) && !/chrome/i.test(ua) ? + (RegExp['$1'] || RegExp['$2']) : undefined,
-			/*maxthon   : _RE.browser.maxthon.test(window.external.max_version) ? + RegExp['$1'] : undefined,*/
 			/*浏览器简单特性*/
 			isGecko     : _RE.browserFeatures.isGecko.test(ua) && !_RE.browserFeatures.isGecko_.test(ua),
 			isWebkit    : _RE.browserFeatures.isWebkit.test(ua),
@@ -200,13 +194,11 @@
 	/*外部库的配置路径，配置默认值，也可以由用户自己设置*/
 	N.EXTERNALTOOLS.config = N.EXTERNALTOOLS.config || {};
 	N.EXTERNALTOOLS.config = {
-			lazyLoader               : 'tools/lazyload-2.0.3/lazyload-min.js',
-			LABjsLoader              : N.debugerFlag == true ? 'tools/LABjs-2.0.3/LAB-debug.min.js' : 'tools/LABjs-2.0.3/LAB.min.js',
-			//baidu                    : 'tools/Tangram-base-1.5.2/tangram-1.3.9.js',
-			baiduBaseJsImporter      : 'tools/Tangram-base-1.5.2/src/jsloader.js',
-			baiduBasePhpImporter     : 'tools/Tangram-base-1.5.2/src/import.php',/*php服务器下可以直接请求此文件*/
-			//sizzle                   : 'tools/Sizzle/sizzle.min.js',
-			extensions               : 'extensions/'
+			baiduBaseJsImporter      : N.DIR + '/tools/Tangram-base-1.5.2/src/jsloader.gt.js',
+			baiduBasePhpImporter     : N.DIR + '/tools/Tangram-base-1.5.2/src/import.php',/*php服务器下可以直接请求此文件*/
+			components				 : N.DIR + '/components/',
+			extensions               : N.DIR + '/extensions/',
+			tools					 : N.DIR + '/tools/'
 	};
 	
 	/*作为缓冲来防止重复加载*/
@@ -317,34 +309,12 @@
 		}
 	};
 	
-	/*开始整合lazyLoader和LABjsLoader，阻塞式整合，隐含式加载，只有在启用高级加载模式的时候才会执行*/
-	if(_useAdvancedLoader){
-		N.debuger.throwit('INFO', _MESSAGES.importExternal + 'LazyLoad to N.loader.lazyLoader, and $LAB to N.loader.LABjsLoader.');
-		N.loader.simpleXhrLoader([N.EXTERNALTOOLS.config.lazyLoader, N.EXTERNALTOOLS.config.LABjsLoader], false, true);
-		try{
-			N.loader.lazyLoader  = LazyLoad; LazyLoad = null;
-			N.loader.LABjsLoader = $LAB;     $LAB     = null;
-		}catch(e){
-			N.debuger.throwit('ERROR', _MESSAGES.loaderLoadedFailed);
-		}
-	}
-	
-	/*开始整合Baidu Tangram框架类库，阻塞式整合，附加式加载，全加载*/
-	// N.debuger.throwit('INFO', _MESSAGES.importExternal + 'Tangram, baidu To N.EXTERNALTOOLS.baidu. -- Line 307');
-	// N.loader.simpleXhrLoader(N.EXTERNALTOOLS.config.baidu, false, false);
-	// try{
-		// N.EXTERNALTOOLS.baidu = baidu;
-		// /*引用Tangram工具库中的ajax工具类*/
-		// N.EXTERNALTOOLS.ajax  = baidu.ajax;
-	// }catch(e){
-		// N.debuger.throwit('WARN', e);
-	// }
 	/**
-	 * Tangram Base 加载函数
+	 * Tangram 加载函数，已经把Base和Component部分合并
 	 * @param {String} namespace 模块格式 aa.bb.cc
 	 * @param {boolean} noCahce 是否允许缓存文件（true: 不允许缓存；false: 可以缓存）
 	 */
-	N.loader.loadBaseTangram     = function(namespace, noCache){
+	N.loader.loadTangram            = function(namespace, noCache){
 		if(_baiduBuffer[namespace]){
 			N.debuger.throwit('INFO', _MESSAGES.hadLoadedIt + namespace);
 			return;
@@ -353,34 +323,11 @@
 			_baiduBuffer[namespace] = 1;
 			return N.loader.simpleXhrLoader(N.EXTERNALTOOLS.config.baiduBasePhpImporter + '?f=' + namespace, false, false, noCache);
 		}else{
-/*			N.loader.lazyLoader.js(N.EXTERNALTOOLS.config.baiduBaseJsImporter, function(){
-				window.Import(namespace);
-			});不能使用异步加载*/
 			N.loader.simpleXhrLoader(N.EXTERNALTOOLS.config.baiduBaseJsImporter, false, false, noCache);
 			window.Import(namespace);
 			_baiduBuffer[namespace] = 1;
 		}
 	};
-	
-	/**
-	 * Tangram Component 加载函数（味如鸡肋）
-	 * @param {boolean} noCahce 是否允许缓存文件（true: 不允许缓存；false: 可以缓存）
-	 * @desc 此函数使用性不强，以其发100个请求来获取一个组件，不如压缩代码
-	 */
-/* 	N.loader.loadComponentTangram = function(namespace, noCache){
-		if(_baiduBuffer[namespace]){
-			N.debuger.throwit('INFO', _MESSAGES.hadLoadedIt + namespace);
-			return;
-		}
-		if(N.isPhpServer){//PHP服务器
-			_baiduBuffer[namespace] = 1;
-			return N.loader.simpleXhrLoader(N.EXTERNALTOOLS.config.baiduComponentPhpImporter + '?f=' + namespace, false, false, noCache);
-		}else{
-			N.loader.simpleXhrLoader(N.EXTERNALTOOLS.config.baiduComponentJsImporter, false, false, noCache);
-			window.Import(namespace);
-			_baiduBuffer[namespace] = 1;
-		}
-	}; */
 	
 	/**
 	 * GT加载自身扩展模块的函数（可以保证执行顺序）
@@ -401,6 +348,25 @@
 		}
 	}
 	
+	/**
+	 * GT加载自身扩展模块的函数（可以保证执行顺序）
+	 * @param {string} | {array} components 扩展模块名（helper.js的话，components = 'helper'）
+	 */
+	N.loader.loadComponents          = function(components){
+		/*单个文件*/
+		if(toString.call(components) == '[object String]')
+			components               = [components];
+		for(var i = 0, len = components.length; i < len; i ++){
+			if(_gtBuffer[components[i]]){
+				N.debuger.throwit('INFO', _MESSAGES.hadLoadedIt + components[i] + ' component.');
+				continue;
+			}
+			var component  = components[i] + '.js';
+			N.loader.simpleXhrLoader((N.EXTERNALTOOLS.config.components + component), false, true, true);
+			_gtBuffer[components[i]] = 1;
+		}
+	}
+	
 	/*DOM基础方法*/
 	N.dom            = N.dom || {};
 	N.dom.g          = function(id){
@@ -409,28 +375,6 @@
 	N.dom.gbt        = function(tagName){
 		return document.getElementsByTagName(tagName);
 	};
-	
-	/**
-	 * 加载高级选择器Sizzle，可以通过配置自动加载，也可以人工加载（调用此函数）
-	 */
-	N.dom.useAdvancedSelector = function(){
-		if(_gtBuffer['sizzle']){
-			N.debuger.throwit('INFO', _MESSAGES.hadLoadedIt + 'sizzle');
-			return;
-		}
-		N.debuger.throwit('INFO', _MESSAGES.importExternal + 'Sizzle to N.dom.selector.');
-		N.loader.simpleXhrLoader(N.EXTERNALTOOLS.config.sizzle, false, true);
-		try{
-			N.dom.selector      = Sizzle; Sizzle = null;//赋值&&释放
-			_gtBuffer['sizzle'] = 1;
-		}catch(e){
-			N.debuger.throwit('ERROR', _MESSAGES.selectorLoadedFailed);
-		}
-	};
-	/*通过_useAdvancedSelector私有变量来判断是否在初始化时加载高级选择器：Sizzle*/
-	if(_useAdvancedSelector){
-		N.dom.useAdvancedSelector();
-	}
 	
 	/**
 	 * 将格式正确的DOM元素字符串转化为相应的DOM对象
@@ -723,7 +667,7 @@
 				inputStyles += (j + ': ' + fileStyleOption[j] + ';');
 			}
 		}
-		o.innerHTML      += '<input type="file" id="GW-Upload" name="GW-Upload" style="' + inputStyles + '"/>';
+		o.innerHTML      += '<input type="file" id="GT-Upload" name="GT-Upload" style="' + inputStyles + '"/>';
 	};
 	
 	
@@ -1323,7 +1267,7 @@
 	 * N.smasher.clear 用于清除smasher的缓存文件
 	 */
 	N.smasher.clear = function(){
-		N.ajax.simpleRequester('gTools.php', {
+		N.ajax.simpleRequester(N.DIR + '/gTools.php', {
 			action : 'clearcache'
 		});
 	};

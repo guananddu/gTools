@@ -21,6 +21,12 @@
  *      one.js + two.js -> one-two.min.js;
  *      one.css + two.css -> one-two.min.css.
  *
+ * Tangram 的命名规则：
+ * 当导入：baidu.ajax.request, baidu.string.*时
+ * 连接及其压缩后的文件是：
+ * baidu.ajax.request-baidu.string.min.js
+ * 即省略了.*，最后添加min.js
+ *
  * 传参规则：
  * 1>若type和group这两个参数都没有传递，则直接返回gTools.js中的内容；
  * 2>type和group参数必须同时存在；
@@ -31,6 +37,10 @@
 set_exception_handler('handle_exception');
 //参数设置
 $smasher_config_base    = 'smasher/config/';
+//获取web访问路径
+$a = dirname(substr(__FILE__, strpos(__FILE__, basename($_SERVER['DOCUMENT_ROOT']))));
+$b = substr($a, strpos($a, DIRECTORY_SEPARATOR));
+$c = $_SERVER['SERVER_NAME'] . str_replace(DIRECTORY_SEPARATOR, '/', $b);
 $options = array(
     'conf'              => $smasher_config_base . 'gTools.xml',//目标配置文件（默认加载gTools.xml）
     'type'              => NULL,//文件类型（从url获得）
@@ -47,7 +57,9 @@ $options = array(
 	'cachejsassetdic'   => 'smasher/cache/asset/js/',//存放最终代码
 	'cachecsssourcedic' => 'smasher/cache/source/css/',
 	'cachecssassetdic'  => 'smasher/cache/asset/css/',
-	'javabin'           => 'C:/WINDOWS/system32/java'
+	'javabin'           => 'C:/WINDOWS/system32/java',
+	'tangram'			=> '',
+	'weburl'			=> $c
 );
 
 //清除缓存

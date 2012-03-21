@@ -15,7 +15,7 @@
  * IE下，get请求不能超过2083字节，请注意。
  */
 
-//$DEBUG = true;
+// $DEBUG = true;
 $DEBUG = false;
 
 $MATCHED = array();
@@ -73,6 +73,7 @@ function importTangram($files, $returnFile = true){
 }
 
 function getFileContents($filename){
+
     global $PATH;
 
     $path = $PATH;
@@ -84,7 +85,8 @@ function getFileContents($filename){
         }
     }
     //为编译更新路径by bell 2011-2-15
-    return file_get_contents("../../Tangram-base/src/". $filename);
+    //return file_get_contents("../../Tangram-base/src/". $filename);
+	return file_get_contents("../../Tangram-base-1.5.2/src/". $filename);
 }
 
 function getPackage($packagePath){

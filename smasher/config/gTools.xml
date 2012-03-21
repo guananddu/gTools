@@ -18,6 +18,17 @@
         <file type="js" src="table.js" />
     </group>
 	
+	<!-- Tangram 引用工具 -->
+    <group id="tangram" rootdir="tools/Tangram-base-1.5.2/src/">
+		<!-- 遵守原来的格式，只写引用的名字空间，会合并出一个文件 -->
+		<!-- 会自动引用tangram的import.php文件进行合并，修改了import.php的第87行 -->
+		<!-- Tangram保留了baidu的命名空间 -->
+		<file type="js" src="baidu.json.parse" />
+		<file type="js" src="baidu.flash.avatarMaker" />
+		<file type="js" src="baidu.i18n.cultures.*" />
+		<file type="js" src="baidu.i18n.*" />
+    </group>
+	
 	<!-- 外置工具 -->
     <group id="tools" rootdir="tools/">
 		<!-- js -->

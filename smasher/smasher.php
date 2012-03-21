@@ -8,9 +8,9 @@ class Smasher
 	protected $engine;
 	protected $engine_yui;
 	protected $engine_cc;
-	protected $nominify = NULL;
-	protected $encode   = NULL;
-	protected $redirect = NULL;
+	protected $nominify   = NULL;
+	protected $encode     = NULL;
+	protected $redirect   = NULL;
     protected $cachejssourcedic;
 	protected $cachejsassetdic;
 	protected $cachecsssourcedic;
@@ -18,6 +18,8 @@ class Smasher
     protected $root_dir   = '';
     protected $java_bin   = '';
 	protected $final_name = '';
+	protected $tangram	  = '';
+	protected $weburl	  = '';
 
 	//加载配置
     protected function load_config($config)
@@ -42,6 +44,8 @@ class Smasher
 		$this->cachecssassetdic  = $config['cachecssassetdic'];
 		$this->root_dir          = '';//在解析xml配置文件的时候会填充此项
 		$this->java_bin          = $config['javabin'];
+		$this->tangram			 = $config['tangram'];
+		$this->weburl			 = $config['weburl'];
     }
 
     protected function get_group_xml($id)
@@ -53,17 +57,26 @@ class Smasher
     protected function concatenate($files, $type)
     {
 		$temp_name = ($type === 'js') ? ($this->cachejssourcedic . $this->get_final_filename($files, $type)) : 
-						($this->cachecsssourcedic . $this->get_final_filename($files, $type));
+						($this->cachecsssourcedic . $this->get_final_filename($files, $type));	
 		//检查是否存在已经合并的缓存文件
 		if(file_exists($temp_name)){
 			return $temp_name;
 		}
         $temp_file = fopen($temp_name, 'w+');
-
-        foreach ($files as $file) {
-            fwrite($temp_file, file_get_contents($file));
-            fwrite($temp_file, "\n");
-        }
+		
+		if($this->group == 'tangram'){
+			$l  = $this->weburl . '/' . $this->tangram . 'import.php?f=' . implode(',', $files);
+			$ch = curl_init($l);
+			curl_setopt($ch, CURLOPT_FILE, $temp_file);
+			curl_setopt($ch, CURLOPT_HEADER, 0);
+			curl_exec($ch);
+			curl_close($ch);
+		}else{
+			foreach ($files as $file) {
+				fwrite($temp_file, file_get_contents($file));
+				fwrite($temp_file, "\n");
+			}	
+		}
 
         fclose($temp_file);
         return $temp_name;
@@ -95,7 +108,7 @@ class Smasher
 		foreach($files as $k => $v){
 			$_t       = strrpos($v, '/');
 			$startpos = $_t === FALSE ? 0 : ($_t + 1);
-			$temp[]   = substr($v, $startpos, (strrpos($v, '.') - $startpos));
+			$temp[]   = ($this->group == 'tangram') ? str_replace('.*', '', $v) : substr($v, $startpos, (strrpos($v, '.') - $startpos));
 		}
 		$prename      = implode('-', $temp) . '.min';
 		$prename      = $this->encode ? md5($prename) : $prename;
@@ -110,20 +123,30 @@ class Smasher
             throw new Exception('Invalid group: ' . $group);
         }
 		//获取对应group的rootdir
-		$this->root_dir = (string)$group_xml->attributes()->rootdir;
+		$this->root_dir    = (string)$group_xml->attributes()->rootdir;
+		if($this->group   == 'tangram'){
+			$this->tangram = $this->root_dir;
+		}
         $files = array();
         foreach ($group_xml->xpath("file[@type='js']") as $file) {
-            $files []= $this->root_dir . ((string) $file['src']);
+			if($this->group == 'tangram'){
+				$files[] = (string)$file['src'];
+			}else{
+	            $files[] = $this->root_dir . ((string)$file['src']);
+			}
         }
-
+		if($this->group == 'tangram'){
+			if(count($files) == 0)
+				$files[]     = 'baidu';//默认包
+		}
 		//判断是否连带上主文件（默认压缩）
-		if($this->nogtools){
+		if($this->nogtools || $this->group == 'tangram'){
 			//不需要带上主文件
 		}else{
 			//需要带上主文件（默认）
 			array_unshift($files, 'gTools.js');
 		}
-        $concatenated_file = $this->concatenate($files, 'js');
+	    $concatenated_file = $this->concatenate($files, 'js');
 		//先检查是否需要压缩
 		if($this->nominify){
 			//不需要
@@ -131,7 +154,7 @@ class Smasher
 				header("Location: " . $concatenated_file);
 				exit;
 			}else{
-				return file_get_contents($concatenated_file);	
+				return file_get_contents($concatenated_file);
 			}
 		}else{
 			//需要，先要检查是否存在压缩后的缓存文件
