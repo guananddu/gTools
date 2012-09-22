@@ -31,7 +31,7 @@
 	 * 
 	 * @config {Array} options[header] header区域的填充数组，每一个元素可以是字符串或者函数，回传td, tr, index
 	 * @config {Array} options[footer] footer区域的填充数组，每一个元素可以是字符串或者函数，回传td, tr, index
-	 *
+	 * footer可有可无！
 	 * @config {Object} options[rawData] 表格传入的原始数据(JSON)
 	 * @config {Function} options[dataAdapter] 数据适配器，用户手动编写，把传入的数据转换成特定的格式：
 	 * 		返回的参考数据格式：
@@ -90,11 +90,12 @@
 			throw new Error('请设置表格的表头区域！');
 			return;
 		};
-		this.options.footer         = this.options.footer || [];
-		if(this.options.footer.length == 0){
+		/*this.options.footer         = this.options.footer || [];*/
+		/*为什么让footer必须具备呢？*/
+/*		if(this.options.footer.length == 0){
 			throw new Error('请设置表格的表尾区域！');
 			return;
-		}
+		}*/
 		this._cellsLength           = this.options.header.length;
 		
 		this.options.rawData        = this.options.rawData || {};
@@ -269,11 +270,13 @@
 			
 			headerContainerDom.appendChild(me._setHeader());
 			bodyContainerDom.appendChild(me._setBody());
-			footerContainerDom.appendChild(me._setFooter());
+			if(me.options.footer)
+				footerContainerDom.appendChild(me._setFooter());
 			
 			innerContainerDom.appendChild(headerContainerDom);
 			innerContainerDom.appendChild(bodyContainerDom);
-			innerContainerDom.appendChild(footerContainerDom);
+			if(me.options.footer)
+				innerContainerDom.appendChild(footerContainerDom);
 			
 			me.parentDom.appendChild(innerContainerDom);
 			
@@ -295,7 +298,7 @@
 					//IE
 					_a = bodyContainerDom.offsetHeight;
 				}
-				bodyContainerDom.style.maxHeight = (_a * me.options.maxRowsLength / me._data.length).toFixed(1) + 'px';
+				bodyContainerDom.style.maxHeight = Number((_a * me.options.maxRowsLength / me._data.length).toFixed(1)) + 1 + 'px';
 			}
 			
 			//回调函数
