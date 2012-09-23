@@ -3,23 +3,31 @@
 	<head>
 		<meta charset="utf-8" />
 		<title>gTools Index</title>
-		<link href="gTools.php?type=css&group=css" type="text/css" rel="stylesheet"/>
-				<!--
+		<link href="gTools.php?type=css&group=css" type="text/css" rel="stylesheet"/>	
+ 	<!--	
  		<script src="gTools.php?type=js&group=extensions&engine=cc" type="text/javascript"></script>
 		<script src="gTools.php?type=js&group=components&nogtools=1&engine=cc" type="text/javascript"></script>
 		<script src="gTools.php?type=js&group=tangram&engine=cc&nominify=1" type="text/javascript"></script>
 	-->
-		<script src="gTools.php?type=js&group=ajax&engine=cc&nominify=1" type="text/javascript"></script>
+		<script src="gTools.php?type=js&group=array&engine=cc&conf=developer&nominify=1" type="text/javascript"></script>
 	</head>
 	
 	<body>
 		<h1>gTools 主页</h1>
 		Just For Fun! : )
 		<script>
-			$GT$.ajax.advancedRequester($GT$.DIR + '/responser/responser.php', {
-				interval: 4000,
-				times: 3,
-				timeout: 3000
+			$GT$.array.asyncFor({
+				from: 10,
+				to: -100,
+				step: -6,
+				interval: 50,
+				iterate: 5,
+				stepCallback: function(inx){
+					console.log(inx);
+				},
+				finalCallBack: function(finalIndex){
+					console.log(finalIndex + '-End Index.');
+				}
 			});
 		</script>
 	</body>

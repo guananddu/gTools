@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<smasher>
+    <!-- 每一个group作为一个操作单位，拥有唯一的ID
+		可以在操作时指定压缩JS或者CSS，而其中的rootdir属性则为源文件目录-->
+	
+	<!-- 开发 -->
+    <group id="array" rootdir="./">
+		<!-- js -->
+		<file type="js" src="extensions/array.js" />
+		<file type="js" src="extensions/ajax.js" />
+    </group>
+	
+    <group id="css" rootdir="css/">
+		<!-- css -->
+        <file type="css" src="reset.css" />
+        <file type="css" src="fonts.css" />
+		<file type="css" src="table.css" />
+    </group>
+</smasher>

@@ -1,8 +1,8 @@
 /*
  * gTools JavaScript Library v1.5.2
- * Copyright 2011, guanwei. All rights reserved.
+ * Copyright 2011, guananddu. All rights reserved.
  * 
- * author: guanwei
+ * author: guananddu
  * version: 1.5.2
  * date: 2011/11/08
  */
@@ -77,14 +77,14 @@
 	/*外部工具的引用路径配置*/
 	N.EXTERNALTOOLS        = {};
 	
-	/*外部库的配置路径，配置默认值，也可以由用户自己设置*/
-	N.EXTERNALTOOLS.config = {
-			baiduBaseJsImporter      : N.DIR + '/tools/Tangram-base-1.5.2/src/jsloader.gt.js',
-			baiduBasePhpImporter     : N.DIR + '/tools/Tangram-base-1.5.2/src/import.php',/*php服务器下可以直接请求此文件*/
-			components				 : N.DIR + '/components/',
-			extensions               : N.DIR + '/extensions/',
-			tools					 : N.DIR + '/tools/'
-	};
+	/*外部库的配置路径，配置默认值，也可以由用户自己设置，真是味如鸡肋*/
+	// N.EXTERNALTOOLS.config = {
+	// 		baiduBaseJsImporter      : N.DIR + '/tools/Tangram-base-1.5.2/src/jsloader.gt.js',
+	// 		baiduBasePhpImporter     : N.DIR + '/tools/Tangram-base-1.5.2/src/import.php',/*php服务器下可以直接请求此文件*/
+	// 		components				 : N.DIR + '/components/',
+	// 		extensions               : N.DIR + '/extensions/',
+	// 		tools					 : N.DIR + '/tools/'
+	// };
 
 	/**
 	 * smasher 操作相关函数
