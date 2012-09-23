@@ -81,7 +81,7 @@
 	 * @param {Number} opt.step 每一次迭代的步子大小
 	 * @param {Number} opt.iterate 在每一次interval之中，迭代多少次，默认是1次
 	 * @param {Number} opt.interval 时间间隔，毫秒记
-	 * @param {Function} opt.stepCallback 每一此迭代处理的调用函数，会传入index
+	 * @param {Function} opt.stepCallback 每一此迭代处理的调用函数，会传入每次迭代的index
 	 * @param {Function} opt.finalCallBack 全部结束后的回调函数，传入最后一次迭代的index
 	 */
 	N.array.asyncFor = function(
@@ -92,6 +92,7 @@
 			to        = opt.to,
 			iterate   = opt.iterate || 1,
 			positive  = opt.step > 0,
+			over      = false;
 			beStop    = function(){
 				// 等于-1的时候，条件不满足
 				return positive ? (
@@ -99,8 +100,19 @@
 				) : (
 					from == to ? 1 : from < to ? 0 : -1
 				);
-			},
-			timer     = window.setInterval(function(){
+			};
+		// 第一次调用
+		main();
+		var timer = window.setInterval(function(){
+			main();
+		}, opt.interval);
+		// 主循环体
+		function main(){
+			// 如果第一次调用main就已经全部执行完的话，在下次清除timer
+			if(over){
+				window.clearInterval(timer);
+				return;
+			}
 			while(iterate){
 				var temp  = beStop();
 				if(!(temp == -1)){
@@ -114,6 +126,7 @@
 						opt.finalCallBack(
 							temp == 0 ? (from -= opt.step) : from
 						);
+					over = true;
 					// 跳出循环
 					break;
 				}
@@ -124,6 +137,6 @@
 			}
 			// 归位
 			iterate = opt.iterate || 1;
-		}, opt.interval);
+		};
 	};
 })();
