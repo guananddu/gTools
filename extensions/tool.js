@@ -33,6 +33,7 @@
 			}
 		});
 	};
+
 	/**
 	 * 创建简单的分页列表
 	 * @param {string} || {HTMLElement} placeHolder 占位符元素ID或者本身（作为DOM元素） 
@@ -76,5 +77,30 @@
 		}
 		placeHolder             = null;
 		as                      = null;
+	};
+
+	/**
+	 * 一个等待下载的新弹页面。
+	 * 现在最流行的其实是Ajax方式的请求下载，静默式下载。
+	 * 
+	 * @param {Object} opt 参数配置
+	 * @param {String} opt.hint 新开页指示文字
+	 * @param {String} opt.url 下载链接
+	 */
+	N.tool.downLoad = function(opt){
+		var hinter  = (opt.hint || '正在生成下载文件') + '...',
+			downLoadWin = window.open(opt.url),
+			newSpan     = downLoadWin.document.createElement('span');
+		newSpan.style.cssText = 'color:red;font-size:bold;';
+		try{
+			downLoadWin.document.body.appendChild(newSpan);
+		}catch(e){};
+		var n                 = 0;
+		var len               = hinter.length;
+		var timer = downLoadWin.setInterval(function(){
+			if(n == 4)
+				n = 0;
+			newSpan.innerHTML = hinter.substring(0, len - (n ++));
+		}, 500);
 	};
 })();

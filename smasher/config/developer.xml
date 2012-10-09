@@ -4,12 +4,12 @@
 		可以在操作时指定压缩JS或者CSS，而其中的rootdir属性则为源文件目录-->
 	
 	<!-- 开发 -->
-    <group id="array" rootdir="./">
+    <group id="developer" rootdir="./">
 		<!-- js -->
-		<file type="js" src="extensions/array.js" />
+		<file type="js" src="extensions/tool.js" />
 		<file type="js" src="extensions/ajax.js" />
     </group>
-	
+
     <group id="css" rootdir="css/">
 		<!-- css -->
         <file type="css" src="reset.css" />

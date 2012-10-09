@@ -374,7 +374,7 @@
 	};
 	
 	/**
-	 * 简易式轮询式请求（目前的这个请求，之间没有间隔时间，会有负载影响，需要改进）
+	 * 简易式轮询式请求（目前的这个请求，之间没有间隔时间，会有负载影响，需要改进，高级的轮询请求器，完全可以由N.timer.timerHandler来做实现，就不去写了）
 	 * @param {string} options.requestUrl 请求的url
 	 * @param {function} options.ensureFunc(xhr, reText) 监控函数，在返回false的状态下会再次发起请求，直至返回true，就会停止请求，轮询结束（当前请求对象xhr和当前返回的reText(xhr.responseText)作为传入参数）
 	 * @param {function} options.beforeRequest(xhr) 整体轮询请求开始之前的前调函数(会将当前xhr请求对象作为传入参数)

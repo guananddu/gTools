@@ -75,7 +75,7 @@
     N.DIR       = (_t.lastIndexOf("/") < 0 ? "." : _t.substring(0, _t.lastIndexOf("/")));
 	
 	/*外部工具的引用路径配置*/
-	N.EXTERNALTOOLS        = {};
+	// N.EXTERNALTOOLS        = {};
 	
 	/*外部库的配置路径，配置默认值，也可以由用户自己设置，真是味如鸡肋*/
 	// N.EXTERNALTOOLS.config = {
