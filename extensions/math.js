@@ -1,14 +1,14 @@
 /**
  * math.js 一些数字处理
  */
-(function(){
+(function () {
 	/**
 	 * 获取GT命名空间
 	 */
-	var N  = eval('window.' + window.__$_GTNAMESPACE_$__);
+	var N = window[__$_GTNAMESPACE_$__];
 	
 	/*数字处理*/
-	N.math                   = N.math || {};
+	N.math = N.math || {};
 	/**
 	 * 将分数转化为对应的百分数
 	 * @param {string} fraction 目标分数（字符串格式，例如：'2/3'）
@@ -16,22 +16,22 @@
 	 *
 	 * @returns {string} 转化后的百分数
 	 */
-	N.math.fractionToPercent = function(fraction, decimals){
-		decimals             = decimals || '';
-		var temp             = eval(fraction);
-		var result           = (100 * temp).toFixed(decimals);
-		if(result == parseInt(result))
+	N.math.fractionToPercent = function (fraction, decimals) {
+		decimals = decimals || '';
+		var temp = eval(fraction);
+		var result = (100 * temp).toFixed(decimals);
+		if (result == parseInt(result))
 			result = parseInt(result);
 		return String(result) + '%';
 	};
 	/**
 	 * 将整数小数点后面多余的0去除
 	 * @param {number} inputData 目标数字
-	 * 
-	 * @returns {number} 返回去0后的整数 
+	 *
+	 * @returns {number} 返回去0后的整数
 	 */
-	N.math.trim0            = function(inputData){
-		if(parseInt(inputData) == inputData){
+	N.math.trim0 = function (inputData) {
+		if (parseInt(inputData) == inputData) {
 			return parseInt(inputData);
 		}
 		return inputData;
@@ -46,26 +46,26 @@
 	 *
 	 * @returns {string} 处理后的数字
 	 */
-	N.math.unitTransformer  = function(inputData, originalUnit, decimals, noUnit){
-		if(inputData        == undefined || inputData == '')
+	N.math.unitTransformer = function (inputData, originalUnit, decimals, noUnit) {
+		if (inputData == undefined || inputData == '')
 			return;
-		inputData           = Number(inputData);
+		inputData = Number(inputData);
 		originalUnit || (originalUnit = 'B');
-		decimals     || (decimals     = 2);
-		noUnit       || (noUnit       = false);
-		var Units           = ['B', 'KB', 'MB', 'GB'];
-		var Step            = 1024;
-		var mePos           = '';
-		var meUnit          = originalUnit;
-		for(var i = 0, len  = Units.length; i < len; i ++){
-			if(Units[i] == originalUnit){
-				mePos       = i;
+		decimals || (decimals = 2);
+		noUnit || (noUnit = false);
+		var Units  = ['B', 'KB', 'MB', 'GB'];
+		var Step   = 1024;
+		var mePos  = '';
+		var meUnit = originalUnit;
+		for (var i = 0, len = Units.length; i < len; i++) {
+			if (Units[i] == originalUnit) {
+				mePos = i;
 				break;
 			}
 		}
-		while(inputData >= Step){//向前进
-			inputData   /= Step;
-			meUnit       = Units[++ mePos];
+		while (inputData >= Step) { //向前进
+			inputData /= Step;
+			meUnit = Units[++mePos];
 		}
 		return N.math.trim0(inputData.toFixed(decimals)) + (noUnit ? '' : meUnit);
 	};

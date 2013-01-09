@@ -1,11 +1,11 @@
 /**
  * ajax.js GT的ajax引擎，引用baidu.ajax.request源码
  */
-(function(){
+(function () {
 	/**
 	 * 获取GT命名空间
 	 */
-	var N  = eval('window.' + window.__$_GTNAMESPACE_$__);
+	var N = window[__$_GTNAMESPACE_$__];
 	
 	N.ajax = N.ajax || {};
 	/**
@@ -28,28 +28,30 @@
 	 * @config {Function} [onbeforerequest]	发送请求之前触发，function(XMLHttpRequest xhr)。
 	 * @config {Function} [on{STATUS_CODE}] 	当请求为相应状态码时触发的事件，如on302、on404、on500，function(XMLHttpRequest xhr)。3XX的状态码浏览器无法获取，4xx的，可能因为未知问题导致获取失败。
 	 * @config {Boolean}  [noCache] 			是否需要缓存，默认为false（缓存），1.1.1起支持。
-	 * 
+	 *
 	 * @meta standard
-	 *             
+	 *
 	 * @returns {XMLHttpRequest} 发送请求的XMLHttpRequest对象
 	 */
 	
-	N.ajax.request	    = function (url, opt_options) {
-		var options     = opt_options || {},
-			data        = options.data || "",
-			async       = !(options.async === false),
-			username    = options.username || "",
-			password    = options.password || "",
-			method      = (options.method || "GET").toUpperCase(),
-			headers     = options.headers || {},
-			// 基本的逻辑来自lili同学提供的patch
-			timeout     = options.timeout || 0,
-			eventHandlers = {},
-			tick, key, xhr;
-
+	N.ajax.request = function (url, opt_options) {
+		var options  = opt_options || {},
+            data     = options.data || "",
+            async    = !(options.async === false),
+            username = options.username || "",
+            password = options.password || "",
+            method   = (options.method || "GET").toUpperCase(),
+            headers  = options.headers || {},
+            // 基本的逻辑来自lili同学提供的patch
+            timeout  = options.timeout || 0,
+            eventHandlers = {},
+            tick,
+            key,
+            xhr;
+		
 		/**
 		 * readyState发生变更时调用
-		 * 
+		 *
 		 * @ignore
 		 */
 		function stateChangeHandler() {
@@ -65,18 +67,18 @@
 				fire(stat);
 				
 				// http://www.never-online.net/blog/article.asp?id=261
-				// case 12002: // Server timeout      
+				// case 12002: // Server timeout
 				// case 12029: // dropped connections
 				// case 12030: // dropped connections
 				// case 12031: // dropped connections
 				// case 12152: // closed by server
 				// case 13030: // status and statusText are unavailable
 				
-				// IE error sometimes returns 1223 when it 
+				// IE error sometimes returns 1223 when it
 				// should be 204, so treat it as success
 				if ((stat >= 200 && stat < 300)
-					|| stat == 304
-					|| stat == 1223) {
+					 || stat == 304
+					 || stat == 1223) {
 					fire('success');
 				} else {
 					fire('failure');
@@ -88,33 +90,33 @@
 				 * function maybe still be called after it is deleted. The theory is that the
 				 * callback is cached somewhere. Setting it to null or an empty function does
 				 * seem to work properly, though.
-				 * 
+				 *
 				 * On IE, there are two problems: Setting onreadystatechange to null (as
 				 * opposed to an empty function) sometimes throws an exception. With
 				 * particular (rare) versions of jscript.dll, setting onreadystatechange from
 				 * within onreadystatechange causes a crash. Setting it from within a timeout
 				 * fixes this bug (see issue 1610).
-				 * 
+				 *
 				 * End result: *always* set onreadystatechange to an empty function (never to
 				 * null). Never set onreadystatechange from within onreadystatechange (always
 				 * in a setTimeout()).
 				 */
 				window.setTimeout(
-					function() {
-						// 避免内存泄露.
-						// 由new Function改成不含此作用域链的 N.blank 函数,
-						// 以避免作用域链带来的隐性循环引用导致的IE下内存泄露. By rocy 2011-01-05 .
-						xhr.onreadystatechange = N.blank;
-						if (async) {
-							xhr = null;
-						}
-					}, 0);
+					function () {
+					// 避免内存泄露.
+					// 由new Function改成不含此作用域链的 N.blank 函数,
+					// 以避免作用域链带来的隐性循环引用导致的IE下内存泄露. By rocy 2011-01-05 .
+					xhr.onreadystatechange = N.blank;
+					if (async) {
+						xhr = null;
+					}
+				}, 0);
 			}
 		}
 		
 		/**
 		 * 获取XMLHttpRequest对象
-		 * 
+		 *
 		 * @ignore
 		 * @return {XMLHttpRequest} XMLHttpRequest对象
 		 */
@@ -135,28 +137,28 @@
 		
 		/**
 		 * 触发事件
-		 * 
+		 *
 		 * @ignore
 		 * @param {String} type 事件类型
 		 */
 		function fire(type) {
 			type = 'on' + type;
 			var handler = eventHandlers[type],
-				globelHandler = N.ajax[type];
+			globelHandler = N.ajax[type];
 			
 			// 不对事件类型进行验证
 			if (handler) {
 				if (tick) {
-				  clearTimeout(tick);
+					clearTimeout(tick);
 				}
-
+				
 				if (type != 'onsuccess') {
 					handler(xhr);
 				} else {
 					//处理获取xhr.responseText导致出错的情况,比如请求图片地址.
 					try {
 						xhr.responseText;
-					} catch(error) {
+					} catch (error) {
 						return handler(xhr);
 					}
 					handler(xhr, xhr.responseText);
@@ -170,7 +172,6 @@
 			}
 		}
 		
-		
 		for (key in options) {
 			// 将options参数中的事件参数复制到eventHandlers对象中
 			// 这里复制所有options的成员，eventHandlers有冗余
@@ -180,7 +181,6 @@
 		
 		headers['X-Requested-With'] = 'XMLHttpRequest';
 		
-		
 		try {
 			xhr = getXHR();
 			
@@ -189,8 +189,8 @@
 					url += (url.indexOf('?') >= 0 ? '&' : '?') + data;
 					data = null;
 				}
-				if(options['noCache'])
-					url += (url.indexOf('?') >= 0 ? '&' : '?') + 'b' + (+ new Date) + '=1';
+				if (options['noCache'])
+					url += (url.indexOf('?') >= 0 ? '&' : '?') + 'b' + ( + new Date) + '=1';
 			}
 			
 			if (username) {
@@ -210,27 +210,27 @@
 					(headers['Content-Type'] || "application/x-www-form-urlencoded"));
 			}
 			
-	/*        for (key in headers) {
-	            if (headers.hasOwnProperty(key)) {
-	                xhr.setRequestHeader(key, headers[key]);
-	            }
-	        }*/
-	        for (key in headers) {
-	            if (headers.hasOwnProperty(key)) {
-	                if(method == 'POST' && key == 'Content-Type')
-	                    continue;
-	                xhr.setRequestHeader(key, headers[key]);
-	            }
-	        }
+			/*        for (key in headers) {
+			if (headers.hasOwnProperty(key)) {
+			xhr.setRequestHeader(key, headers[key]);
+			}
+			}*/
+			for (key in headers) {
+				if (headers.hasOwnProperty(key)) {
+					if (method == 'POST' && key == 'Content-Type')
+						continue;
+					xhr.setRequestHeader(key, headers[key]);
+				}
+			}
 			
 			fire('beforerequest');
-
+			
 			if (timeout) {
-			  tick = setTimeout(function(){
-				xhr.onreadystatechange = N.blank;
-				xhr.abort();
-				fire("timeout");
-			  }, timeout);
+				tick = setTimeout(function () {
+						xhr.onreadystatechange = N.blank;
+						xhr.abort();
+						fire("timeout");
+					}, timeout);
 			}
 			xhr.send(data);
 			
@@ -254,66 +254,67 @@
 	 * @param {Number} opt_options[times] 失败后重复请求的次数，为空则持续进行请求
 	 * @warn! 不能再次设置opt_options中的超时/失败两个事件
 	 */
-	N.ajax.advancedRequester = function(url, opt_options){
-		if(typeof url      !== 'string')
+	N.ajax.advancedRequester = function (url, opt_options) {
+		if (typeof url !== 'string')
 			throw new Error('N.ajax.advancedRequester expects a String as the first parameter!');
-		if(opt_options.onfailure || opt_options.ontimeout)
+		if (opt_options.onfailure || opt_options.ontimeout)
 			throw new Error('N.ajax.advancedRequester doesn\'t expect you to set onfailure/ontimeout event!');
 		opt_options.onfailure = opt_options.ontimeout = reRequest;
 		var me = arguments.callee;
-		function reRequest(){
-			if(opt_options.times){
-				if(me._counter === opt_options.times)
+		function reRequest() {
+			if (opt_options.times) {
+				if (me._counter === opt_options.times)
 					return;
 			}
-			setTimeout(function(){
+			setTimeout(function () {
 				N.ajax.request(url, opt_options);
-				me._counter ++;
+				me._counter++;
 			}, opt_options.interval);
 		};
 		N.ajax.request(url, opt_options);
 		me._counter = 1;
 	};
-
+	
 	/**
 	 * 简易Ajax控制器，Ajax引擎暂时使用的是Tangram Ajax控制器（已经独立2012.03.03）
 	 * @param {number} options.delayTime 请求延迟时间（最长请求时间，毫秒记）
 	 * @param {number} options.retryTimes 单次请求失败后重复请求最大次数
-	 * @param {string} options.ajaxRequestUrl 请求的目标url 
+	 * @param {string} options.ajaxRequestUrl 请求的目标url
 	 * @param {string} options.method(optional) 请求方法（默认为GET，也可以为POST）
 	 * @param {string} options.data(optional) POST的数据（在POST方法下有效，GET方法可以在url中附加数据），格式：a=aaa&b=bbb&c=ccc
 	 * @param {function} options.beforeRequest 每次请求的前调函数（会把当前请求的xhr对象作为第一个参数传入）
 	 * @param {function} options.callBack 回调函数（会把当前请求的xhr对象作为第一个参数传入，第二个参数为xhr.responseText）
 	 *
 	 * @grammar
-     *	var testAjax = new xxx.ajax.ajaxHandler({
-     *		delayTime      : 2 * 1000,
-     *		retryTimes     : 10,
-     *		ajaxRequestUrl : '/request.php',
-     *		callBack       : function(xhr){
-     *			//xhr: 返回当前请求的xhr对象
-     *		}
-     *	});
-     *	testAjax.startRequest();//开始请求
+	 *	var testAjax = new xxx.ajax.ajaxHandler({
+	 *		delayTime      : 2 * 1000,
+	 *		retryTimes     : 10,
+	 *		ajaxRequestUrl : '/request.php',
+	 *		callBack       : function(xhr){
+	 *			//xhr: 返回当前请求的xhr对象
+	 *		}
+	 *	});
+	 *	testAjax.startRequest();//开始请求
 	 */
-	N.ajax.ajaxHandler = function(options){
+	N.ajax.ajaxHandler = function (options) {
 		/*pras check*/
-		if(!options.ajaxRequestUrl || typeof options.ajaxRequestUrl !== 'string')
+		if (!options.ajaxRequestUrl || typeof options.ajaxRequestUrl !== 'string')
 			throw new Error('N.ajax.ajaxHandler : ajaxRequestUrl 必须为请求字符串！');
-		options.delayTime     = options.delayTime  || 5 * 1000;
-		options.retryTimes    = (options.retryTimes + 1) || (10 + 1);
-		options.method        = options.method || 'GET';
-		options.data          = options.data || '';
-		options.callBack      = options.callBack || function(){};
-		options.beforeRequest = options.beforeRequest || function(){};
-		if('function' !== typeof options.callBack || 'function' !== typeof options.beforeRequest)
+		options.delayTime = options.delayTime || 5 * 1000;
+		options.retryTimes = (options.retryTimes + 1) || (10 + 1);
+		options.method = options.method || 'GET';
+		options.data = options.data || '';
+		options.callBack = options.callBack || function () {};
+		options.beforeRequest = options.beforeRequest || function () {};
+		if ('function' !== typeof options.callBack || 'function' !== typeof options.beforeRequest)
 			throw new Error('N.ajax.ajaxHandler : 前调函数或者回调函数必须为函数类型！');
-		this.init(options);/*init*/
+		this.init(options);
+		/*init*/
 	};
 	N.ajax.ajaxHandler.prototype = {
-		init : function(options){
+		init : function (options) {
 			var me = this;
-			for(var i in options){
+			for (var i in options) {
 				me[i] = options[i];
 			}
 			/*加载ajax引擎，使用tangram函数库*/
@@ -321,54 +322,56 @@
 			me.ajaxEngine = N.ajax.request;
 			me.resetReqPar();
 		},
-		resetReqPar  : function(){
-			var me            = this;
-			me.startFlag      = false;
+		resetReqPar : function () {
+			var me = this;
+			me.startFlag = false;
 		},
-		updateReqPar : function(){
-			var me           = this;
-			if(!me.startFlag)
+		updateReqPar : function () {
+			var me = this;
+			if (!me.startFlag)
 				me.startFlag = true;
 		},
-		startRequest : function(){
+		startRequest : function () {
 			var me = this;
-			me.xhrs   = [];
+			me.xhrs = [];
 			me.ajaxTimer = new N.timer.timerHandler({
-				interval : me.delayTime,
-				times    : me.retryTimes,
-				callBack : function(index){
-					me.xhrs[index] = me.ajaxEngine(me.ajaxRequestUrl, {
-						method          : me.method,
-						data            : me.data,
-						onbeforerequest : function(xhr){
-							try{
-								if(index == 0){
-									me.updateReqPar();
-									me.beforeRequest(xhr);	
+					interval : me.delayTime,
+					times : me.retryTimes,
+					callBack : function (index) {
+						me.xhrs[index] = me.ajaxEngine(me.ajaxRequestUrl, {
+								method : me.method,
+								data : me.data,
+								onbeforerequest : function (xhr) {
+									try {
+										if (index == 0) {
+											me.updateReqPar();
+											me.beforeRequest(xhr);
+										}
+										if (index != 0 && index > 0) {
+											me.xhrs[index - 1].abort();
+											/*Abort The Previous One*/
+											if (index == me.retryTimes - 1) {
+												xhr.abort();
+												/*Abort The Last One*/
+												N.debuger.throwit('WARN', _MESSAGES.noResponse + me.ajaxRequestUrl);
+												return;
+											}
+											me.updateReqPar();
+											me.beforeRequest(xhr);
+										}
+									} catch (e) {};
+								},
+								onsuccess : function (xhr, msg) {
+									me.resetReqPar();
+									me.ajaxTimer.abort();
+									me.callBack(xhr, msg);
+								},
+								onfailure : function (xhr) {
+									//do nothing;Auto Start The Next One
 								}
-								if(index != 0 && index > 0){
-									me.xhrs[index - 1].abort();/*Abort The Previous One*/
-									if(index == me.retryTimes - 1){
-										xhr.abort();/*Abort The Last One*/
-										N.debuger.throwit('WARN', _MESSAGES.noResponse + me.ajaxRequestUrl);
-										return;
-									}
-									me.updateReqPar();
-									me.beforeRequest(xhr);
-								}
-							}catch(e){};
-						},
-						onsuccess       : function(xhr, msg){
-							me.resetReqPar();
-							me.ajaxTimer.abort();
-							me.callBack(xhr, msg);
-						},
-						onfailure       : function(xhr){
-							//do nothing;Auto Start The Next One
-						}
-					});
-				}
-			});
+							});
+					}
+				});
 			me.ajaxTimer.fire();
 		}
 	};
@@ -382,72 +385,72 @@
 	 * @param {function} options.stepCallBackFunc(xhr, reText) 单步回调函数（当前请求对象xhr和当前返回的reText(xhr.responseText)作为传入参数）
 	 * @param {function} options.afterRequest(xhr, reText) 整体轮询结束后的回调函数（当前请求对象xhr和当前返回的reText(xhr.responseText)作为传入参数）
 	 * @param {boolean} options.advancedMode 是否开启高级模式（高级模式具有了单次请求的错误及其延迟，及其重复次数处理，默认不开启）
-	 * 
+	 *
 	 * 在开启高级模式下配置advanceOptions参数
 	 * @param {number} advanceOptions.delayTime 单次请求等待的延迟时间（最长请求时间，毫秒）
 	 * @param {number} advanceOptions.retryTimes 单次请求失败后重复请求最大次数
 	 */
 	/*静态计数器*/
-	N.ajax.counter              = {};
-	N.ajax.takeTurnsToRequester = function(options, advanceOptions){
-		if(!options.requestUrl || typeof options.requestUrl !== 'string')
+	N.ajax.counter = {};
+	N.ajax.takeTurnsToRequester = function (options, advanceOptions) {
+		if (!options.requestUrl || typeof options.requestUrl !== 'string')
 			throw new Error('N.ajax.takeTurnsToRequester : requestUrl 必须为请求字符串！');
-		options.ensureFunc        || (options.ensureFunc = function(){});
-		options.beforeRequest     || (options.beforeRequest = function(){});
-		options.stepBeforeRequest || (options.stepBeforeRequest = function(){});
-		options.stepCallBackFunc  || (options.stepCallBackFunc = function(){});
-		options.afterRequest      || (options.afterRequest = function(){});
-		options.advancedMode      || (options.advancedMode = false);
+		options.ensureFunc || (options.ensureFunc = function () {});
+		options.beforeRequest || (options.beforeRequest = function () {});
+		options.stepBeforeRequest || (options.stepBeforeRequest = function () {});
+		options.stepCallBackFunc || (options.stepCallBackFunc = function () {});
+		options.afterRequest || (options.afterRequest = function () {});
+		options.advancedMode || (options.advancedMode = false);
 		
 		/*Load Ajax Engine*/
 		this.ajaxEngine = N.ajax.request;
 		this.requestUrl = options.requestUrl;
 		this.ensureFunc = options.ensureFunc;
-		this.beforeRequest     = options.beforeRequest;
+		this.beforeRequest = options.beforeRequest;
 		this.stepBeforeRequest = options.stepBeforeRequest;
-		this.stepCallBackFunc  = options.stepCallBackFunc;
+		this.stepCallBackFunc = options.stepCallBackFunc;
 		this.afterRequest = options.afterRequest;
 		this.advancedMode = options.advancedMode;
-		this.ops          = options;
+		this.ops = options;
 		
 		/*高级模式*/
-		if(this.advancedMode){
+		if (this.advancedMode) {
 			advanceOptions || (advanceOptions = {});
-			advanceOptions.delayTime  || (advanceOptions.delayTime = 3 * 1000);
+			advanceOptions.delayTime || (advanceOptions.delayTime = 3 * 1000);
 			advanceOptions.retryTimes || (advanceOptions.retryTimes = 4);
 			
-			this.delayTime  || (this.delayTime = advanceOptions.delayTime);
+			this.delayTime || (this.delayTime = advanceOptions.delayTime);
 			this.retryTimes || (this.retryTimes = advanceOptions.retryTimes);
-			this.adops      || (this.adops = advanceOptions);
+			this.adops || (this.adops = advanceOptions);
 		}
-		if(N.ajax.counter[this.requestUrl] === undefined)
+		if (N.ajax.counter[this.requestUrl] === undefined)
 			N.ajax.counter[this.requestUrl] = 0;
 	};
 	N.ajax.takeTurnsToRequester.prototype = {
-		run: function(){
+		run : function () {
 			var me = this;
-			N.ajax.counter[me.requestUrl] ++;
-			if(me.advancedMode){
+			N.ajax.counter[me.requestUrl]++;
+			if (me.advancedMode) {
 				/*采用高级模式*/
 				new N.ajax.ajaxHandler({
-					delayTime      : me.delayTime,
-					retryTimes     : me.retryTimes,
+					delayTime : me.delayTime,
+					retryTimes : me.retryTimes,
 					ajaxRequestUrl : me.requestUrl,
-					beforeRequest  : function(xhr){
+					beforeRequest : function (xhr) {
 						/*整体前调函数*/
-						if(N.ajax.counter[me.requestUrl] == 1){
+						if (N.ajax.counter[me.requestUrl] == 1) {
 							me.beforeRequest(xhr);
 						}
 						/*单步前调函数*/
 						me.stepBeforeRequest(xhr, N.ajax.counter[me.requestUrl]);
 					},
-					callBack       : function(xhr, reText){
-						if(!me.ensureFunc(xhr, reText)){
+					callBack : function (xhr, reText) {
+						if (!me.ensureFunc(xhr, reText)) {
 							/*继续轮询*/
 							me.stepCallBackFunc(xhr, reText);
 							/*初始化及其开始下次请求*/
 							new N.ajax.takeTurnsToRequester(me.ops, me.adops).run();
-						}else if(me.ensureFunc(xhr, reText)){
+						} else if (me.ensureFunc(xhr, reText)) {
 							/*条件满足，停止轮询*/
 							/*最后一次单步回调*/
 							me.stepCallBackFunc(xhr, reText);
@@ -456,24 +459,24 @@
 						}
 					}
 				}).startRequest();
-			}else{
+			} else {
 				/*采用一般模式*/
 				me.ajaxEngine(me.requestUrl, {
-					onbeforerequest : function(xhr){
+					onbeforerequest : function (xhr) {
 						/*整体前调函数*/
-						if(N.ajax.counter[me.requestUrl] == 1){
+						if (N.ajax.counter[me.requestUrl] == 1) {
 							me.beforeRequest(xhr);
 						}
 						/*单步前调函数*/
 						me.stepBeforeRequest(xhr, N.ajax.counter[me.requestUrl]);
 					},
-					onsuccess : function(xhr, reText){
-						if(!me.ensureFunc(xhr, reText)){
+					onsuccess : function (xhr, reText) {
+						if (!me.ensureFunc(xhr, reText)) {
 							/*继续轮询*/
 							me.stepCallBackFunc(xhr, reText);
 							/*初始化及其开始下次请求*/
 							new N.ajax.takeTurnsToRequester(me.ops).run();
-						}else if(me.ensureFunc(xhr, reText)){
+						} else if (me.ensureFunc(xhr, reText)) {
 							/*条件满足，停止轮询*/
 							/*最后一次单步回调*/
 							me.stepCallBackFunc(xhr, reText);
@@ -481,11 +484,50 @@
 							me.afterRequest(xhr, reText);
 						}
 					}
-				});	
+				});
 			}
 		}
 	};
 	
+	/**
+	 * 请求包装器，可统一处理请求错误
+	 * @param {obj} paras 请求包装器所使用的参数
+	 */
+	N.ajax.requester = function (opts) {
+		if (!opts || !opts.url)
+			return;
+		/*默认值*/
+		opts.ons = opts.ons || function () {};
+		opts.onf = opts.onf || function () {};
+		if (opts.data) { //参数设置，传入的data最好是一个json对象
+			opts.data = 'params=' + baidu.json.stringify(opts.data);
+		}
+		var ajaxEngine = N.ajax;
+		/*成功回调*/
+		opts.onsuccess = function (xhr, xhrText) {
+			var xhrJson = N.json.parse(xhrText);
+			/*程序/请求异常*/
+			if (xhrJson.status == 500) {
+				var errorMsg;
+				errorMsg = xhrJson.errorCode.message ? xhrJson.errorCode.message : 'Data Error!';
+				console.warn(errorMsg);
+				// alert(errorMsg);
+				return;
+			}
+			/*正常返回*/
+			if (xhrJson.status == 200) {
+				xhrJson.data ? opts.ons(xhrJson.data) : opts.ons();
+			}
+		};
+		opts.onfailure = function (xhr) {
+			console.warn('Ajax Error About : ' + opts.url);
+			// alert(center.config.hints.requestFail + opts.url);
+			opts.onf();
+		};
+		/*失败回调*/
+		ajaxEngine.request(opts.url, opts);
+	};
+    
 	/**
 	 * 简易信标式请求
 	 * @param {string} baseurl 目标url
@@ -493,12 +535,11 @@
 	 * 例如：
 	 * {a: 'a', b: 'b'}
 	 */
-	N.ajax.simpleRequester = function(baseurl, paras){
+	N.ajax.simpleRequester = function (baseurl, paras) {
 		var _t = [];
-		for(var i in paras){
+		for (var i in paras) {
 			_t.push(
-				i + '=' + paras[i]
-			);
+				i + '=' + paras[i]);
 		}
 		//开始请求
 		new Image().src = baseurl + '?' + _t.join('&');

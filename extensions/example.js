@@ -1,11 +1,11 @@
 /**
  * Example.js 作为模块编写的例子文件
  */
-(function(){
+(function () {
 	/**
 	 * 获取GT命名空间
 	 */
-	var N  = eval('window.' + window.__$_GTNAMESPACE_$__);
+	var N = window[__$_GTNAMESPACE_$__];
 	
 	/*Start Extensions:*/
 	N.extensionsTest = 'Test!!!!I am a test!!!';
