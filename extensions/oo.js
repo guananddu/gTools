@@ -271,5 +271,24 @@
 		
 		// Finally, return the constructor function
 		return constructor;
-	}
+	};
+
+    /**
+     * 特殊包装函数
+     * 
+     * @param {Function} original 原始函数
+     * @param {Function} append 需要append的函数
+     * @param {Object} context 两函数的执行上下文
+     * @return {Function} 返回包装后的函数
+     */
+    N.oo.appendFunc = function(original, append, context) {
+        var old  = original;
+        context  = context == undefined ? null : context;
+        return function() {
+            // 调用原始函数
+            old.apply(context, arguments);
+            // 调用append函数
+            append.apply(context, arguments);
+        };
+    };
 })();

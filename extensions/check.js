@@ -75,4 +75,14 @@
 	N.check.isPureChinese = function (str) {
 		return /^[\u4E00-\u9FA5]+$/.test(str);
 	};
+
+    /**
+     * 字母数字组合，3个以上才搜索
+     * 
+     * @param {string} s 输入字符串
+     * @return {boolean} true/false
+     */
+    N.check.checkSearching = function(s) {
+        return /^[\da-zA-Z]{0,2}$/.test(s);
+    };
 })();

@@ -108,4 +108,23 @@
 		var returner = str.substring(0, i - 1) + '..';
 		return htmlEncode ? baidu.string.encodeHTML(returner) : returner;
 	};
+
+	/**
+	 * 增加'http://'的url前缀
+	 * @param {string} prefixes 需要增加的前缀
+	 * @param {string} v        原值
+	 * @param {function} set    回调函数
+	 * @use   center.common.funcs.addPrefix('http://|https://', me.getValue(), function(newV){
+              		me.setValue(newV);
+              });
+	 */
+	N.str.addPrefix = function(prefixes, v, set){
+		prefixes    = prefixes.split('|');
+		var defaultPrefix = prefixes[0];
+		for(var i = 0, len = prefixes.length; i < len; i ++){
+			if(prefixes[i] === v.substring(0, prefixes[i].length))
+				return;
+		}
+		set(defaultPrefix + v);
+	};
 })();

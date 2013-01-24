@@ -25,4 +25,43 @@
 			return cache[arg];
 		};
 	};
+
+    /**
+     * 创建节流函数（即，一个函数可能在短时间内执行好几遍，为了
+     * 节约性能，这个函数可以解决这个问题，例如onscroll事件的触发等等）
+     * 
+     * @param {Function} method 需要节流的函数 
+     * @param {Array} args 传入参数列表
+     * @param {Object} context 执行上线文
+     * @param {Number} delay 执行delay
+     * @return {undefined}
+     */
+    N.algo.throttle = function(method, args, context, delay) {
+        context = context == undefined ? null : context;
+        method.tId && clearTimeout(method.tId);
+        method.tId = setTimeout(function() {
+            method.apply(context, args);
+        }, (delay ? delay : 140));
+    };
+
+    /**
+     * 创建节能函数，一个函数（比如某种情况下的onchange事件，可能会调用两次，为了防止短期内重复调用）
+     * 
+     * @param {Function} method 需要节能的函数 
+     * @param {Array} args 传入参数列表
+     * @param {Object} context 执行上线文
+     * @param {Number} delay 执行delay
+     * @return {undefined}
+     */
+    N.algo.savingEnergy = function(method, args, context, delay) {
+        if(method._runing_)
+            return;
+        context = context == undefined ? null : context;
+        // 开始调用
+        method._runing_     = 1;
+        method.apply(context, args);
+        setTimeout(function() {
+            method._runing_ = 0;
+        }, (delay ? delay : 140));
+    };
 })();
