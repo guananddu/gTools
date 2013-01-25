@@ -249,13 +249,12 @@
 	
 	/**
 	 * 一个等待下载的新弹页面。
-	 * 现在最流行的其实是Ajax方式的请求下载，静默式下载。
 	 *
 	 * @param {Object} opt 参数配置
 	 * @param {String} opt.hint 新开页指示文字
 	 * @param {String} opt.url 下载链接
 	 */
-	N.tool.downLoad = function (opt) {
+	N.tool.downLoad = function(opt) {
 		var hinter  = (opt.hint || '正在生成下载文件') + '...',
 		downLoadWin = window.open(opt.url),
 		newSpan     = downLoadWin.document.createElement('span');
@@ -271,6 +270,44 @@
 				newSpan.innerHTML = hinter.substring(0, len - (n++));
 			}, 500);
 	};
+
+    /**
+     * 提供一种“静默下载”机制，利用form提交至隐藏的iframe中
+     * 
+     * @param  {Object} params 需要提交的参数列表（{a: '1234', b: 'xxx'}）
+     * @param  {string} url    提交的url
+     */
+    N.tool.hiddenDownload = function(params, url) {
+        // 移除原有的隐藏元素
+        var oldIframe, oldForm;
+        (oldIframe = document
+            .getElementById('_hiddenIframe_'))
+            && document.body.removeChild(oldIframe);
+        (oldForm = document
+            .getElementById('_hiddenForm_')) 
+            && document.body.removeChild(oldForm);
+        // 构建参数列表
+        var paramsStr  = '';
+        for(var key in params) {
+            paramsStr += stringFormat(
+                '<input type="hidden" name="#{0}" value="#{1}" />',
+                key,
+                params[key]
+            );
+        }
+        var iframe = '<iframe id="_hiddenIframe_" name="_hiddenIframe_" style="display:none;"></iframe>';
+        var form   = '<form id="_hiddenForm_" target="_hiddenIframe_" action="' + url + '" method="POST">' +
+                        paramsStr +
+                     '</form>';
+        var iframe = getDom(iframe);
+        var form   = getDom(form);
+        // or set content / 跨域
+        // iframe.src = "data:text/html;charset=utf-8," + escape(content);
+        document.body.appendChild(iframe);
+        document.body.appendChild(form);
+        // 提交
+        form.submit();
+    };
 
     /**
      * 实时监听input输入框的值变化
