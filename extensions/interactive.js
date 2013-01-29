@@ -68,4 +68,29 @@
             (target, 'mouseout', cmouseOut)
             (layer,  'mouseout', cmouseOut);
     };
+
+    /**
+     * 创建Button click交互，切换button的背景图
+     * @param  {HTMLElement} target 目标元素
+     * @param  {Object} pos 图片的位置坐标信息
+     * @param  {string} pos.md mousedown以后的图片坐标，例如('-73px -52px')
+     * @param  {string} pos.mu mouseup以后的图片坐标（即初始坐标），例如('-123px -52px')
+     * @param  {Object} calls 回调函数集
+     * @param  {Function} calls.md mousedown之后的回调函数
+     * @param  {Function} calls.mu mouseup之后的回调函数
+     */
+    N.interactive.buttonClick = function(target, pos, calls) {
+        var mouseDown = function(e) {
+            target.style.backgroundPosition = pos.md;
+            calls && calls.md && calls.md.call(target);
+        };
+        var mouseUp   = function(e) {
+            target.style.backgroundPosition = pos.mu;
+            calls && calls.mu && calls.mu.call(target);
+        };
+        // 这里的baidu.event.on是为事件加载器，视情况而不同
+        baidu.event.on(target, 'mousedown', mouseDown);
+        baidu.event.on(target, 'mouseup', mouseUp);
+        baidu.event.on(target, 'mouseout', mouseUp);
+    };
 })();
