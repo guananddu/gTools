@@ -272,12 +272,13 @@
 	};
 
     /**
-     * 提供一种“静默下载”机制，利用form提交至隐藏的iframe中
+     * 提供一种“静默下载”机制，利用form提交至隐藏的iframe中(也不一定非的是下载的用途)
+	 * "静默提交"表单
      * 
      * @param  {Object} params 需要提交的参数列表（{a: '1234', b: 'xxx'}）
      * @param  {string} url    提交的url
      */
-    N.tool.hiddenDownload = function(params, url) {
+    N.tool.hiddenSubmit = function(params, url) {
         // 移除原有的隐藏元素
         var oldIframe, oldForm;
         (oldIframe = document
