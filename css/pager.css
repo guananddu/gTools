@@ -1,0 +1,37 @@
+/**
+ * pager.css 分页样式
+ */
+
+/* 分页列表样式  Start*/
+.pager-container span {
+	cursor: pointer;
+	color: #0000CC;
+	display: inline-block;
+	border: 1px solid #E7ECF0;
+	border-radius: 2px;
+	height: 21px;
+	line-height: 21px;
+	padding: 0 5px;
+	margin: 0 2px;
+	font-size: 11px;
+	text-decoration: none;
+}
+.pager-container span:hover {
+	background-color: #E8E8E8 !important;
+	text-decoration: none;
+}
+.pager-is-current {
+	background-color: #fff !important;
+	border: none !important;
+	color: #000 !important;
+	font-weight: bold;
+	font-size: 13px !important;
+}
+.pager-lgthen {
+	color: #337BAC;
+	/*font-weight: bold;*/
+}
+.pager-prev-disabled, .pager-next-disabled, .pager-lgthen-dis {
+	color: silver !important;
+}
+/* 分页列表样式  End*/
