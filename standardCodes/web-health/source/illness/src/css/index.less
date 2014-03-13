@@ -1,0 +1,658 @@
+/**
+ * @file 新疾病首页
+ * @author guanwei01(guanwei01@baidu.com)
+ */
+
+@import "common.less";
+@import '../../../common/src/css/ui/pager.less';
+@import '../../../common/src/css/biz/human.less';
+@import '../../../common/src/css/biz/scrollbar.less';
+
+// 当前目录下的滚动条样式
+// @import 'scrollbar.less';
+
+.main {
+    background-color: #fff;
+}
+
+.container {
+    padding-top: 20px;
+}
+
+.font-yahei() {
+    font-family: "Microsoft YaHei", "微软雅黑";
+}
+
+// 每个区域的header为公用样式
+.ill-self() {
+
+    background-color: #fff;
+    position: relative;
+    overflow: hidden;
+    border-bottom: 1px solid #E4E4E4;
+    .clearfix;
+
+    .header {
+
+        height: 33px;
+        border-bottom: 2px solid #42B3E5;
+        .clearfix;
+        padding: 0 1px;
+        overflow: hidden;
+
+    }
+
+    .header-title, 
+    .header-text {
+        display: inline-block;
+        float: left;
+        margin-right: 15px;
+    }
+
+    .header-title {
+        height: 32px;
+        line-height: 32px;
+        color: #0384CE;
+        .font-yahei;
+        font-size: 18px;
+        letter-spacing: 1px;
+    }
+
+    .header-text {
+        font-size: 13px;
+        height: 15px;
+        line-height: 15px;
+        margin-top: 11px;
+        color: #666;
+    }
+
+    .body {
+        border: 1px solid #E0E0E0;
+        border-bottom: none;
+        border-top: none;
+        .clearfix;
+    }
+
+}
+
+// 按人群查疾病
+.ill-by-people {
+
+    .ill-self;
+    *padding-bottom: 10px;
+
+    .body {
+        *margin-bottom: -20px;
+        *padding-bottom: 10px;
+    }
+
+    .body-left, 
+    .body-right {
+        position: relative;
+        overflow: hidden;
+        .clearfix;
+    }
+
+    .body-left {
+        width: 474px;
+        float: left;
+        position: relative;
+        border-right: 1px solid #E0E0E0;
+        *height: 300px;
+
+        .h-split, 
+        .v-split {
+            position: absolute;
+            display: inline-block;
+        }
+
+        .h-split {
+            left: 0;
+            top: 50%;
+            height: 1px;
+            border-top: 1px solid #E0E0E0;
+            width: 100%;
+        }
+
+        .v-split {
+            left: 50%;
+            top: 0;
+            width: 1px;
+            border-left: 1px solid #E0E0E0;
+            height: 100%;
+        }
+
+        .left-item {
+            float: left;
+            margin: 20px 10px 24px 20px;
+            width: 207px;
+            height: 112px;
+            overflow: hidden;
+            *display: inline;
+        }
+
+        .item-header {
+            .clearfix;
+        }
+
+        .header-icon {
+            display: inline-block;
+            height: 41px;
+            width: 40px;
+            margin-right: 2px;
+            float: left;
+        }
+
+        .icon-0, 
+        .icon-1, 
+        .icon-2, 
+        .icon-3 {
+            background: url( ../img/illness-icons.png ) no-repeat;
+            _background-image: url( ../img/illness-icons.gif );
+        }
+
+        .icon-0 {
+            background-position: -6px -131px;
+        }
+
+        .icon-1 {
+            background-position: -6px -184px;
+        }
+
+        .icon-3 {
+            background-position: -6px -240px;
+        }
+
+        .icon-2 {
+            background-position: -6px -293px;
+        }
+
+        .header-title {
+            display: inline-block;
+            height: 32px;
+            line-height: 32px;
+            margin-right: 2px;
+            float: left;
+            background-color: #42B3E5;
+            .font-yahei;
+            font-size: 15px;
+            color: #fff;
+            text-align: center;
+            padding: 0 10px;
+        }
+
+        .item-body {
+            margin-top: 5px;
+            overflow: hidden;
+            font-size: 13px;
+            line-height: 30px;
+
+            a {
+                display: inline-block;
+                margin-right: 10px;
+                color: #0063DC;
+                white-space: nowrap;
+            }
+        }
+
+    }
+
+    .body-right {
+        float: right;
+        padding: 20px 15px 10px 15px;
+        width: 473px;
+        font-size: 13px;
+        *height: 270px;
+    }
+
+    .right-header {
+        .clearfix;
+        color: #666;
+        height: 26px;
+        line-height: 26px;
+        border-bottom: 1px solid #E0E0E0;
+        overflow: hidden;
+        white-space: nowrap;
+        position: relative;
+        *zoom: 1;
+
+        span {
+            float: left;
+            display: inline-block;
+            position: relative;
+        }
+
+        span.selected {
+
+            em.show {
+                color: #fff;
+                background-color: #42B3E5;
+                font-weight: bold;
+                cursor: auto !important;
+                &:hover {
+                    text-decoration: none !important;
+                }
+            }
+
+        }
+
+        em {
+            display: inline-block;
+            height: 26px;
+            padding: 0 4px;
+            font-style: normal;
+            margin-right: 1px;
+        }
+
+        em.hidden {
+            visibility: hidden;
+            font-weight: bold;
+        }
+        em.show {
+            cursor: pointer;
+            position: absolute;
+            left: 0;
+            top: 0;
+            &:hover {
+                text-decoration: underline;
+            }
+        }
+    }
+
+    .right-body {
+        margin-top: 15px;
+        line-height: 26px;
+        
+        .list-con {
+            .max-height( 210px );
+            overflow: hidden;
+        }
+
+        p {
+            .clearfix;
+        }
+
+        a.title {
+            float: left;
+            color: #0063DC;
+
+            em {
+                font-style: normal;
+                color: #FF2900;
+            }
+        }
+
+        a.hosp {
+            float: right;
+            color: #666;
+        }
+
+        a.more {
+            display: block;
+            color: #666;
+
+            em {
+                font-style: normal;
+                color: #FF2900;
+            }
+        }
+
+    }
+
+}
+
+// 按科室查疾病
+.ill-by-division {
+
+    .ill-self;
+    margin-top: 20px;
+    font-size: 13px;
+
+    .filter-list {
+        padding: 5px 0;
+        position: relative;
+        border-bottom: 1px solid #E0E0E0;
+        .clearfix;
+        line-height: 32px;
+
+        height: 32px;
+        overflow: hidden;
+
+        padding-bottom: 7px;
+    }
+
+    // 点击展开
+    .filter-list-open {
+        height: auto !important;
+    }
+
+    .filter-header {
+        display: inline-block;
+        text-align: right;
+        margin-left: 20px;
+        float: left;
+        overflow: hidden;
+    }
+
+    .filter-body {
+        .clearfix;
+        .max-width( 865px );
+        display: inline-block;
+        float: left;
+
+        .filter-item {
+            display: inline-block;
+            border: 1px solid #fff;
+            float: left;
+            cursor: pointer;
+            position: relative;
+
+            height: 25px;
+            line-height: 25px;
+            padding: 0 10px;
+            margin: 4px;
+
+            &:hover {
+                border-color: #e0e0e0;
+                color: #EE4815;
+            }
+        }
+
+        .selected {
+            border-color: #e0e0e0;
+            color: #EE4815;
+            &:hover {
+                cursor: auto;
+            }
+        }
+
+    }
+
+    .filter-more {
+        float: right;
+        color: #666;
+        font-size: 12px;
+        margin-right: 15px;
+        cursor: pointer;
+        display: none;
+    }
+
+    // 列表
+    .list {
+        position: relative;
+        .min-height( 624px );
+        .clearfix;
+    }
+
+    .list-item {
+        position: relative;
+        width: 50%;
+        .min-height( 50px; );
+
+        .half-item {
+            border-bottom: 1px solid #E0E0E0;
+            padding: 20px;
+            display: none; // 初识隐藏
+        }
+
+        .item-header {
+            height: 20px;
+            margin-bottom: 10px;
+            overflow: hidden;
+        }
+
+        .header-text {
+            display: inline-block;
+            height: 20px;
+            line-height: 20px;
+            font-size: 16px;
+            .font-yahei;
+            margin: 0;
+            font-weight: bold;
+            color: #666;
+            margin-right: 15px;
+        }
+
+        .header-tab {
+            display: inline-block;
+            color: #0063DC;
+            margin-top: 5px;
+        }
+
+        .tab-split {
+            display: inline-block;
+            color: #999;
+            margin: 0 15px;
+        }
+
+        .item-ul {
+            display: block;
+            margin-top: 15px;
+
+            li {
+                margin-bottom: 10px;
+                list-style: none;
+                color: #666;
+
+                background: 
+                    url( ../img/illness-icons.png ) 
+                    no-repeat -488px -485px;
+                _background-image: url( ../img/illness-icons.gif );
+                padding-left: 20px;
+
+                .clearfix; 
+                display: block;
+                height: 20px;
+                overflow: hidden;
+
+                *background-position: -488px -487px;
+            }
+
+        }
+
+        .item-title {
+            float: left;
+            color: #0063DC;
+
+            em {
+                font-style: normal;
+                color: #FF2900;
+            }
+        }
+
+        .item-hosp {
+            float: right;
+            color: #666;
+        }
+
+        .no-li-margin {
+            margin-bottom: 0 !important;
+        }
+
+    }
+
+    .list-left {
+        float: left;
+    }
+
+    .list-right {
+        float: right;
+    }
+
+}
+
+.ill-by-division-pager {
+    margin: 30px auto 10px auto;
+}
+
+// 按照部位查疾病
+.ill-by-part {
+
+    .ill-self;
+    margin-top: 20px;
+    font-size: 13px;
+
+    .body {
+        padding: 20px;
+        position: relative;
+    }
+
+    .human-container {
+        float: left;
+        width: 490px;
+        height: 500px;
+        overflow: hidden;
+        position: relative;
+    }
+
+    .info-container {
+        float: right;
+        width: 430px;
+        height: 500px;
+        overflow: hidden;
+        position: relative;
+        .clearfix;
+    }
+
+    .info-header {
+        padding-bottom: 14px;
+        border-bottom: 1px solid #E0E0E0;
+        font-size: 16px;
+        .font-yahei;
+        font-weight: bold;
+        color: #666;
+        margin-bottom: 10px;
+
+        span {
+            color: #FF2900;
+        }
+    }
+
+    .info-body {
+        .clearfix;
+        overflow: hidden;
+    }
+
+    .info-ill {
+        float: left;
+        padding: 10px;
+        width: 140px - 20px;
+        height: 450px - 20px;
+        background-color: #F5F5F5;
+        overflow: hidden;
+    }
+
+    .info-tabs {
+        float: right;
+        width: 280px;
+    }
+
+    .ill-span {
+        display: block;
+        height: 30px;
+        line-height: 30px;
+        color: #666;
+        font-size: 16px;
+        margin-bottom: 8px;
+        padding: 0 10px;
+        .font-yahei;
+        cursor: pointer;
+        overflow: hidden;
+
+        &:hover {
+            color: #fff;
+            background-color: #42B3E5;
+        }
+    }
+
+    span.selected {
+        color: #fff;
+        background-color: #42B3E5;
+        cursor: auto;
+    }
+
+    .ill-wiki, 
+    .ill-tab {
+        .clearfix;
+        width: 100%;
+        position: relative;
+        margin-bottom: 15px;
+    }
+
+    .wiki-desc {
+        color: #666;
+        &:hover {
+            color: #0063DC;
+        }
+    }
+
+    .wiki-more {
+        color: #0063DC;
+        float: right;
+    }
+
+    .tab-header {
+        height: 20px;
+        line-height: 20px;
+        font-size: 16px;
+        .font-yahei;
+        display: inline-block;
+        width: 100%;
+        overflow: hidden;
+        color: #0063DC;
+        margin-bottom: 5px;
+
+        em {
+            font-style: normal;
+            color: #FF2900;
+        }
+    }
+
+    .tab-body {
+        p {
+            .clearfix;
+            display: block;
+            line-height: 18px;
+            height: 18px;
+            overflow: hidden;
+            margin-bottom: 3px;
+        }
+    }
+
+    .item-title {
+        color: #000;
+        float: left;
+        &:hover {
+            color: #0063DC;
+        }
+    }
+
+    .item-hosp {
+        color: #666;
+        float: right;
+    }
+
+    .ill-tabs-container {
+        padding: 10px;
+    }
+
+    .no-margin-bottom {
+        margin-bottom: 0 !important;
+    }
+
+}
+
+.ill-scrollbar {
+    .health-scrollbar( 100%, 440px, 2px);
+
+    &-panel {
+        width: 258px;
+        height: 448px;
+        position: relative;
+    }
+
+    &-track {
+        right: 5px;
+        height: 450px;
+    }
+}
