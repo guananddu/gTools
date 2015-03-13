@@ -11,7 +11,7 @@ define( function( ) {
     // 设置各种id和class
     var preOpt = {
         // 父元素（可以是id或Dom元素，必须）
-        container: 'container',
+        container: 'container2',
         // 设置主表格的id和class（即table元素的id或class，两者都可选）
         // id: 'my-table-id',
         className: 'my-table',
@@ -202,7 +202,7 @@ define( function( ) {
     var myTableConstructor = sTable( preOpt );
     var meTable = new myTableConstructor( conOpt );
     // 渲染
-    meTable.setData( data ).render( )
+    meTable.setData( data2 ).render( )
 
     /**
      * 表格的事件代理机制
@@ -265,10 +265,6 @@ define( function( ) {
             for ( var i = 0, len = all.length; i < len; all[ i++ ].checked = target.checked ) {}
         }, false );
     } );
-
-    window.setTimeout( function () {
-        meTable.setData( data2 ).render();
-    }, 4000 );
 
 } );
 
