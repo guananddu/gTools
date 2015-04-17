@@ -1,0 +1,269 @@
+@border1dot5: 2/3px;
+@border2: 1/2px;
+@border3: 1/3px;
+
+// 设置整个border
+.onepix-border-all ( @class, @borderColor ) {
+
+    .@{class} {
+        border: 1px solid @borderColor;
+    }
+
+    @media (-webkit-min-device-pixel-ratio:1.5),(min-device-pixel-ratio:1.5) {
+        .@{class} {
+            border: none;
+            background-image: -webkit-gradient(linear,left top,left bottom,color-stop(0%,@borderColor),color-stop(50%,@borderColor),color-stop(50%,transparent)),
+                -webkit-gradient(linear,left top,right top,color-stop(50%,transparent),color-stop(50%,@borderColor),color-stop(100%,@borderColor)),
+                -webkit-gradient(linear,left top,left bottom,color-stop(50%,transparent),color-stop(50%,transparent),color-stop(100%,@borderColor)),
+                -webkit-gradient(linear,left top,right top,color-stop(0%,@borderColor),color-stop(50%,@borderColor),color-stop(50%,transparent));
+            background-image: -webkit-linear-gradient(top,@borderColor 0,@borderColor 50%,transparent 50%),
+                -webkit-linear-gradient(left,transparent 50%,@borderColor 50%,@borderColor 100%),
+                -webkit-linear-gradient(top,transparent 50%,@borderColor 50%,@borderColor 100%),
+                -webkit-linear-gradient(left,@borderColor 0,@borderColor 50%,transparent 50%);
+            background-image: linear-gradient(to bottom,@borderColor 0,@borderColor 50%,transparent 50%),
+                linear-gradient(to right,transparent 50%,@borderColor 50%,@borderColor 100%),
+                linear-gradient(to bottom,transparent 50%,@borderColor 50%,@borderColor 100%),
+                linear-gradient(to right,@borderColor 0,@borderColor 50%,transparent 50%);
+            -webkit-background-sizse: 100% @border1dot5,@border1dot5 100%,100% @border1dot5,@border1dot5 100%;
+            background-size: 100% @border1dot5,@border1dot5 100%,100% @border1dot5,@border1dot5 100%;
+            background-repeat: no-repeat;
+            background-position: top,right,bottom,left
+        }
+    }
+
+    @media (-webkit-min-device-pixel-ratio:2),(min-device-pixel-ratio:2) {
+        .@{class} {
+            border: none;
+            background-image: -webkit-gradient(linear,left top,left bottom,color-stop(0%,@borderColor),color-stop(50%,@borderColor),color-stop(50%,transparent)),
+                -webkit-gradient(linear,left top,right top,color-stop(50%,transparent),color-stop(50%,@borderColor),color-stop(100%,@borderColor)),
+                -webkit-gradient(linear,left top,left bottom,color-stop(50%,transparent),color-stop(50%,transparent),color-stop(100%,@borderColor)),
+                -webkit-gradient(linear,left top,right top,color-stop(0%,@borderColor),color-stop(50%,@borderColor),color-stop(50%,transparent));
+            background-image: -webkit-linear-gradient(top,@borderColor 0,@borderColor 50%,transparent 50%),
+                -webkit-linear-gradient(left,transparent 50%,@borderColor 50%,@borderColor 100%),
+                -webkit-linear-gradient(top,transparent 50%,@borderColor 50%,@borderColor 100%),
+                -webkit-linear-gradient(left,@borderColor 0,@borderColor 50%,transparent 50%);
+            background-image: linear-gradient(to bottom,@borderColor 0,@borderColor 50%,transparent 50%),
+                linear-gradient(to right,transparent 50%,@borderColor 50%,@borderColor 100%),
+                linear-gradient(to bottom,transparent 50%,@borderColor 50%,@borderColor 100%),
+                linear-gradient(to right,@borderColor 0,@borderColor 50%,transparent 50%);
+            -webkit-background-sizse: 100% 1px,1px 100%,100% 1px,1px 100%;
+            background-size: 100% 1px,1px 100%,100% 1px,1px 100%;
+            background-repeat: no-repeat;
+            background-position: top,right,bottom,left
+        }
+    }
+
+    @media (-webkit-min-device-pixel-ratio:3),(min-device-pixel-ratio:3) {
+        .@{class} {
+            border: none;
+            background-image: -webkit-gradient(linear,left top,left bottom,color-stop(0%,@borderColor),color-stop(50%,@borderColor),color-stop(50%,transparent)),
+                -webkit-gradient(linear,left top,right top,color-stop(50%,transparent),color-stop(50%,@borderColor),color-stop(100%,@borderColor)),
+                -webkit-gradient(linear,left top,left bottom,color-stop(50%,transparent),color-stop(50%,transparent),color-stop(100%,@borderColor)),
+                -webkit-gradient(linear,left top,right top,color-stop(0%,@borderColor),color-stop(50%,@borderColor),color-stop(50%,transparent));
+            -webkit-background-sizse: 100% 1px,1px 100%,100% 1px,1px 100%;
+            background-size: 100% 1px,1px 100%,100% 1px,1px 100%;
+            background-repeat: no-repeat;
+            background-position: top,right,bottom,left
+        }
+    }
+
+}
+
+// 同时设置top和bottom
+.onepix-border-tb ( @class, @borderTopColor, @borderBottomColor ) {
+
+    .@{class} {
+        border-top: 1px solid @borderTopColor;
+        border-bottom: 1px solid @borderBottomColor;
+        box-sizing: border-box;
+    }
+
+    @media (-webkit-min-device-pixel-ratio:1.5),(min-device-pixel-ratio:1.5) {
+        .@{class} {
+            border: none;
+            background-image: -webkit-gradient(linear,left top,left bottom,color-stop(0%,@borderTopColor),color-stop(50%,@borderTopColor),color-stop(50%,transparent)),
+                -webkit-gradient(linear,left top,left bottom,color-stop(50%,transparent),color-stop(50%,transparent),color-stop(100%,@borderBottomColor));
+            background-image: -webkit-linear-gradient(top,@borderTopColor 0,@borderTopColor 50%,transparent 50%),
+                -webkit-linear-gradient(top,transparent 50%,@borderBottomColor 50%,@borderBottomColor 100%);
+            background-image: linear-gradient(to bottom,@borderTopColor 0,@borderTopColor 50%,transparent 50%),
+                linear-gradient(to bottom,transparent 50%,@borderBottomColor 50%,@borderBottomColor 100%);
+            -webkit-background-size: 100% @border1dot5,100% @border1dot5;
+            background-size: 100% @border1dot5,100% @border1dot5;
+            background-repeat: no-repeat;
+            background-position: top,bottom;
+        }
+    }
+
+    @media (-webkit-min-device-pixel-ratio:2),(min-device-pixel-ratio:2) {
+        .@{class} {
+            border: none;
+            background-image: -webkit-gradient(linear,left top,left bottom,color-stop(0%,@borderTopColor),color-stop(50%,@borderTopColor),color-stop(50%,transparent)),
+                -webkit-gradient(linear,left top,left bottom,color-stop(50%,transparent),color-stop(50%,transparent),color-stop(100%,@borderBottomColor));
+            background-image: -webkit-linear-gradient(top,@borderTopColor 0,@borderTopColor 50%,transparent 50%),
+                -webkit-linear-gradient(top,transparent 50%,@borderBottomColor 50%,@borderBottomColor 100%);
+            background-image: linear-gradient(to bottom,@borderTopColor 0,@borderTopColor 50%,transparent 50%),
+                linear-gradient(to bottom,transparent 50%,@borderBottomColor 50%,@borderBottomColor 100%);
+            -webkit-background-size: 100% 1px,100% 1px;
+            background-size: 100% 1px,100% 1px;
+            background-repeat: no-repeat;
+            background-position: top,bottom;
+        }
+    }
+
+    @media (-webkit-min-device-pixel-ratio:3),(min-device-pixel-ratio:3) {
+        .@{class} {
+            border: none;
+            background-image: -webkit-gradient(linear,left top,left bottom,color-stop(0%,@borderTopColor),color-stop(50%,@borderTopColor),color-stop(50%,transparent)),
+                -webkit-gradient(linear,left top,left bottom,color-stop(50%,transparent),color-stop(50%,transparent),color-stop(100%,@borderBottomColor));
+            -webkit-background-size: 100% 1px,100% 1px;
+            background-size: 100% 1px,100% 1px;
+            background-repeat: no-repeat;
+            background-position: top,bottom;
+        }
+    }
+
+}
+
+// 单独设置border-top
+.onepix-border-top ( @class, @borderColor ) {
+    .@{class} {
+        border-top: 1px solid @borderColor;
+    }
+
+    @media (-webkit-min-device-pixel-ratio:1.5),(min-device-pixel-ratio:1.5) {
+        .@{class} {
+            border: none;
+            background-image: -webkit-gradient(linear,left top,left bottom,color-stop(0%,@borderColor),color-stop(50%,@borderColor),color-stop(50%,transparent));
+            background-image: -webkit-linear-gradient(top,@borderColor 0,@borderColor 50%,transparent 50%);
+            background-image: linear-gradient(to bottom,@borderColor 0,@borderColor 50%,transparent 50%);
+            -webkit-background-size: 100% @border1dot5;
+            background-size: 100% @border1dot5;
+            background-repeat: no-repeat;
+            background-position: top;
+        }
+    }
+
+    @media (-webkit-min-device-pixel-ratio:2),(min-device-pixel-ratio:2) {
+        .@{class} {
+            border: none;
+            background-image: -webkit-gradient(linear,left top,left bottom,color-stop(0%,@borderColor),color-stop(50%,@borderColor),color-stop(50%,transparent));
+            background-image: -webkit-linear-gradient(top,@borderColor 0,@borderColor 50%,transparent 50%);
+            background-image: linear-gradient(to bottom,@borderColor 0,@borderColor 50%,transparent 50%);
+            -webkit-background-size: 100% 1px;
+            background-size: 100% 1px;
+            background-repeat: no-repeat;
+            background-position: top;
+        }
+    }
+}
+
+// 单独设置border-bottom
+.onepix-border-bottom ( @class, @borderColor ) {
+    .@{class} {
+        border-bottom: 1px solid @borderColor;
+    }
+
+    @media (-webkit-min-device-pixel-ratio:1.5),(min-device-pixel-ratio:1.5) {
+        .@{class} {
+            border: none;
+            background-image: -webkit-gradient(linear,left top,left bottom,color-stop(50%,transparent),color-stop(50%,transparent),color-stop(100%,@borderColor));
+            background-image: -webkit-linear-gradient(top,transparent 50%,@borderColor 50%,@borderColor 100%);
+            background-image: linear-gradient(to bottom,transparent 50%,@borderColor 50%,@borderColor 100%);
+            background-size: 100% @border1dot5;
+            background-repeat: no-repeat;
+            background-position: bottom;
+        }
+    }
+
+    @media (-webkit-min-device-pixel-ratio:2),(min-device-pixel-ratio:2) {
+        .@{class} {
+            border: none;
+            background-image: -webkit-gradient(linear,left top,left bottom,color-stop(50%,transparent),color-stop(50%,transparent),color-stop(100%,@borderColor));
+            background-image: -webkit-linear-gradient(top,transparent 50%,@borderColor 50%,@borderColor 100%);
+            background-image: linear-gradient(to bottom,transparent 50%,@borderColor 50%,@borderColor 100%);
+            background-size: 100% 1px;
+            background-repeat: no-repeat;
+            background-position: bottom;
+        }
+    }
+}
+
+// 单独设置left
+.onepix-border-left ( @class, @borderColor ) {
+
+    .@{class} {
+        border-left: 1px solid @borderColor;
+    }
+
+    @media (-webkit-min-device-pixel-ratio:1.5),(min-device-pixel-ratio:1.5) {
+        .@{class} {
+            border: none;
+            background-image: -webkit-gradient(linear,left top,right top,color-stop(0%,@borderColor),color-stop(50%,@borderColor),color-stop(50%,transparent));
+            background-image: -webkit-linear-gradient(left,@borderColor 0,@borderColor 50%,transparent 50%);
+            background-image: linear-gradient(to right,@borderColor 0,@borderColor 50%,transparent 50%);
+            background-size: @border1dot5 100%;
+            background-repeat: no-repeat;
+            background-position: left;
+        }
+    }
+
+    @media (-webkit-min-device-pixel-ratio:2),(min-device-pixel-ratio:2) {
+        .@{class} {
+            border: none;
+            background-image: -webkit-gradient(linear,left top,right top,color-stop(0%,@borderColor),color-stop(50%,@borderColor),color-stop(50%,transparent));
+            background-image: -webkit-linear-gradient(left,@borderColor 0,@borderColor 50%,transparent 50%);
+            background-image: linear-gradient(to right,@borderColor 0,@borderColor 50%,transparent 50%);
+            background-size: 1px 100%;
+            background-repeat: no-repeat;
+            background-position: left;
+        }
+    }
+
+}
+
+// 单独设置right
+.onepix-border-right ( @class, @borderColor ) {
+
+    .@{class} {
+        border-right: 1px solid @borderColor;
+    }
+
+    @media (-webkit-min-device-pixel-ratio:1.5),(min-device-pixel-ratio:1.5) {
+        .@{class} {
+            border: none;
+            background-image: -webkit-gradient(linear,left top,right top,color-stop(50%,transparent),color-stop(50%,@borderColor),color-stop(100%,@borderColor));
+            background-image: -webkit-linear-gradient(left,transparent 50%,@borderColor 50%,@borderColor 100%);
+            background-image: linear-gradient(to right,transparent 50%,@borderColor 50%,@borderColor 100%);
+            background-size: @border1dot5 100%;
+            background-repeat: no-repeat;
+            background-position: right;
+        }
+    }
+
+    @media (-webkit-min-device-pixel-ratio:2),(min-device-pixel-ratio:2) {
+        .@{class} {
+            border: none;
+            background-image: -webkit-gradient(linear,left top,right top,color-stop(50%,transparent),color-stop(50%,@borderColor),color-stop(100%,@borderColor));
+            background-image: -webkit-linear-gradient(left,transparent 50%,@borderColor 50%,@borderColor 100%);
+            background-image: linear-gradient(to right,transparent 50%,@borderColor 50%,@borderColor 100%);
+            background-size: 1px 100%;
+            background-repeat: no-repeat;
+            background-position: right;
+        }
+    }
+
+}
+
+// 单独设置top-border或bottom-border【这两个不能同时使用哦】
+// .onepix-border-top( content-border, red );
+.onepix-border-bottom( content-border, #000 );
+
+// 单独设置left或right【这两个不能同时使用哦】
+// .onepix-border-left( content-border, red );
+// .onepix-border-right( content-border, red );
+
+// 同时设置top和bottom
+//.onepix-border-tb( content-border, red, #000 );
+
+// 设置整个border
+//.onepix-border-all( content-border, red );
